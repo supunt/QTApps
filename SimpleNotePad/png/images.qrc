@@ -1,0 +1,28 @@
+<RCC>
+    <qresource prefix="/png">
+        <file>bar-chart.png</file>
+        <file>calculator.png</file>
+        <file>calendar.png</file>
+        <file>chat.png</file>
+        <file>check.png</file>
+        <file>cloud-computing.png</file>
+        <file>cloud-computing-1.png</file>
+        <file>envelope.png</file>
+        <file>hourglass.png</file>
+        <file>images.qrc</file>
+        <file>link.png</file>
+        <file>lock.png</file>
+        <file>notepad.png</file>
+        <file>pencil.png</file>
+        <file>picture.png</file>
+        <file>pie-chart.png</file>
+        <file>save.png</file>
+        <file>scissors.png</file>
+        <file>search.png</file>
+        <file>settings.png</file>
+        <file>shield.png</file>
+        <file>trash.png</file>
+        <file>zoom-in.png</file>
+        <file>zoom-out.png</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>png/notepad.png</file>
+        <file>png/save.png</file>
+        <file>png/scissors.png</file>
+        <file>png/search.png</file>
+        <file>png/trash.png</file>
+    </qresource>
+</RCC>
