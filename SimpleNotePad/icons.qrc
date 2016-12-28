@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>icons/1482299600_55.png</file>
+        <file>icons/1482299622_63.png</file>
+        <file>icons/1482299738_ic_save_48px.png</file>
+        <file>icons/1482299743_editor-floopy-dish-save-glyph.png</file>
+        <file>icons/1482299894_icon-ios7-undo.png</file>
+        <file>icons/1482299903_icon-ios7-redo.png</file>
+        <file>icons/1482299988_Untitled-2-10.png</file>
+        <file>icons/1482299993_cut.png</file>
+        <file>icons/1482300089_paste.png</file>
+        <file>icons/1482300108_Info01.png</file>
+        <file>icons/1482300680_49.png</file>
+        <file>icons/1482301030_icons_new.png</file>
+        <file>icons/1482301423_circle-add-plus-new-glyph.png</file>
+        <file>icons/Copy-50.png</file>
+        <file>icons/Cut-50.png</file>
+        <file>icons/Info-50.png</file>
+        <file>icons/New Copy-50.png</file>
+        <file>icons/New Document-50.png</file>
+        <file>icons/New File-50.png</file>
+        <file>icons/Open Folder-50.png</file>
+        <file>icons/Print-50.png</file>
+        <file>icons/Redo-50.png</file>
+        <file>icons/Save as-50.png</file>
+        <file>icons/Save-50.png</file>
+        <file>icons/Settings-50.png</file>
+        <file>icons/Undo-50.png</file>
+        <file>icons/Paste-50.png</file>
+    </qresource>
+</RCC>
