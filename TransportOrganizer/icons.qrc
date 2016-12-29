@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/Car Rental.png</file>
+        <file>icons/Close Window.png</file>
+        <file>icons/Gmail Login.png</file>
+        <file>icons/Login Rounded Right.png</file>
+        <file>icons/Logout Rounded Left.png</file>
+        <file>icons/Settings.png</file>
+        <file>icons/Add Database.png</file>
+        <file>icons/Add Key.png</file>
+        <file>icons/Add User Male.png</file>
+        <file>icons/Car Service.png</file>
+        <file>icons/Car.png</file>
+        <file>icons/Delete Database Filled.png</file>
+        <file>icons/Edit User Male.png</file>
+    </qresource>
+</RCC>
