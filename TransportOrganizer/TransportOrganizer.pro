@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui \
+            sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -32,7 +33,12 @@ SOURCES += main.cpp\
     formCtrl/settingdialog.cpp \
     mailClient/smtpconnection.cpp \
     formCtrl/addnewvehicle.cpp \
-    formCtrl/registernewdriver.cpp
+    formCtrl/registernewdriver.cpp \
+    db/dbcon.cpp \
+    db/dbcolumn.cpp \
+    db/dbtable.cpp \
+    entities/entity.cpp \
+    entities/entityinstance.cpp
 
 HEADERS  += mainwindow.h \
     formCtrl/addmailclient.h \
@@ -43,7 +49,12 @@ HEADERS  += mainwindow.h \
     formCtrl/settingdialog.h \
     mailClient/smtpconnection.h \
     formCtrl/addnewvehicle.h \
-    formCtrl/registernewdriver.h
+    formCtrl/registernewdriver.h \
+    db/dbcon.h \
+    db/dbcolumn.h \
+    db/dbtable.h \
+    entities/entity.h \
+    entities/entityinstance.h
 
 FORMS    += uiFiles/mainwindow.ui \
     uiFiles/settingdialog.ui \

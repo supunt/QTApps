@@ -129,5 +129,22 @@
   </widget>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>Discard</sender>
+   <signal>clicked()</signal>
+   <receiver>AddMailClient</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>229</x>
+     <y>285</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>233</x>
+     <y>303</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

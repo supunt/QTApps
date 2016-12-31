@@ -3,6 +3,8 @@
 
 #include <QMainWindow>
 
+#include "db/dbcon.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -22,8 +24,11 @@ private slots:
 
     void on_actionAdd_New_Driver_triggered();
 
+    void on_actionRegistered_Drivers_triggered();
+
 private:
     Ui::MainWindow *ui;
+    DBCon dbCon;
 };
 
 #endif // MAINWINDOW_H

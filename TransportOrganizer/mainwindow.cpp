@@ -1,14 +1,16 @@
+// ----------------------------------------------------------
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
-#include <QMessageBox>
-
+// -----------------------------------------------------------------------------------------------------------------------------------------
 #include "formCtrl/settingdialog.h"
 #include "formCtrl/addnewvehicle.h"
 #include "formCtrl/registernewdriver.h"
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
+#include <QMessageBox>
 #include <QStandardItemModel>
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -21,20 +23,22 @@ MainWindow::MainWindow(QWidget *parent) :
     model->setHorizontalHeaderItem(2, new QStandardItem(QString("Column3 Header")));
 
     ui->tableView->setModel(model);*/
+    //LoadConfigs();
+    // ConnectToDB();
 }
-
+// -----------------------------------------------------------------------------------------------------------------------------------------
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
+// -----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::on_actionAdd_New_Vehicle_triggered()
 {
     AddNewVehicle* av = new AddNewVehicle;
     av->setWindowTitle("Add new");
     av->show();
 }
-
+// -----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::on_actionSettings_triggered()
 {
     SettingDialog* sd =  new SettingDialog;
@@ -42,10 +46,16 @@ void MainWindow::on_actionSettings_triggered()
     sd->setWindowTitle("Settings");
     sd->show();
 }
-
+// -----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::on_actionAdd_New_Driver_triggered()
 {
     RegisterNewDriver* rd = new RegisterNewDriver;
     rd->setWindowTitle("Add new Driver");
     rd->show();
 }
+// -----------------------------------------------------------------------------------------------------------------------------------------
+void MainWindow::on_actionRegistered_Drivers_triggered()
+{
+
+}
+// -----------------------------------------------------------------------------------------------------------------------------------------

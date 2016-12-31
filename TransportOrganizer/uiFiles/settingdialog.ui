@@ -161,7 +161,7 @@
   </widget>
   <action name="actionAdd_New_Mail_Client">
    <property name="icon">
-    <iconset resource="icons.qrc">
+    <iconset resource="../icons.qrc">
      <normaloff>:/icons/Gmail Login.png</normaloff>:/icons/Gmail Login.png</iconset>
    </property>
    <property name="text">
@@ -173,7 +173,7 @@
   </action>
  </widget>
  <resources>
-  <include location="icons.qrc"/>
+  <include location="../icons.qrc"/>
  </resources>
  <connections>
   <connection>

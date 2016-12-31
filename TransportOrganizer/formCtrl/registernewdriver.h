@@ -16,8 +16,6 @@ public:
     ~RegisterNewDriver();
 
 private slots:
-    void on_date_IssueDate_dateChanged(const QDate &date);
-
     void on_date_dob_dateChanged(const QDate &date);
 
 private:

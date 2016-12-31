@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>377</width>
-    <height>357</height>
+    <width>372</width>
+    <height>356</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -277,6 +277,22 @@
  </widget>
  <resources/>
  <connections>
+  <connection>
+   <sender>date_IssueDate</sender>
+   <signal>dateChanged(QDate)</signal>
+   <receiver>date_expDate</receiver>
+   <slot>setDate(QDate)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>190</x>
+     <y>264</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>188</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>

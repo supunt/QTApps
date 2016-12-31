@@ -1,6 +1,7 @@
 #include "registernewdriver.h"
 #include "ui_registernewdriver.h"
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
 RegisterNewDriver::RegisterNewDriver(QWidget *parent, bool edit) :
     QDialog(parent),
     ui(new Ui::RegisterNewDriver)
@@ -11,21 +12,19 @@ RegisterNewDriver::RegisterNewDriver(QWidget *parent, bool edit) :
     SetupUi(edit);
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
 RegisterNewDriver::~RegisterNewDriver()
 {
     delete ui;
 }
 
-void RegisterNewDriver::on_date_IssueDate_dateChanged(const QDate &date)
-{
-    ui->date_expDate->setDate(date);
-}
-
+// -----------------------------------------------------------------------------------------------------------------------------------------
 void RegisterNewDriver::on_date_dob_dateChanged(const QDate &date)
 {
     ui->le_age->setText("10");
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
 void RegisterNewDriver::SetupUi(bool edit)
 {
     if (edit)
@@ -39,6 +38,5 @@ void RegisterNewDriver::SetupUi(bool edit)
         ui->date_IssueDate->setDate(date);
         setWindowTitle("Add New Driver");
     }
-
-
 }
+// -----------------------------------------------------------------------------------------------------------------------------------------

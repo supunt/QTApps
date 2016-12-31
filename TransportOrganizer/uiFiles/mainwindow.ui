@@ -43,6 +43,8 @@
     </property>
     <addaction name="actionAdd_New_Driver"/>
     <addaction name="actionAdd_New_Vehicle"/>
+    <addaction name="separator"/>
+    <addaction name="actionRegistered_Drivers"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -63,6 +65,7 @@
    <addaction name="actionAdd_New_Driver"/>
    <addaction name="actionAdd_New_Vehicle"/>
    <addaction name="actionSettings"/>
+   <addaction name="actionRegistered_Drivers"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionAdd_New_Vehicle">
@@ -90,6 +93,15 @@
    </property>
    <property name="text">
     <string>Add New Driver</string>
+   </property>
+  </action>
+  <action name="actionRegistered_Drivers">
+   <property name="icon">
+    <iconset resource="../icons.qrc">
+     <normaloff>:/icons/Edit User Male.png</normaloff>:/icons/Edit User Male.png</iconset>
+   </property>
+   <property name="text">
+    <string>Registered Drivers</string>
    </property>
   </action>
  </widget>

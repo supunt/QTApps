@@ -1,0 +1,35 @@
+sqlite3 transportOrgMainDB;
+
+-- system data tables
+create table entities(
+	entity_id integer,
+	parent_entity_id integer,
+	display_name varchar(50),
+	prefix varchar(4),
+	icon blob
+	);
+
+create table entity_properties(
+	entity_id integer,
+	property_name varchar(50),
+	propertyGroup varchar(30),
+	data_type integer
+	);
+
+-- user data tables
+create table vehicles(
+	licensePlate varchar(30),
+	driver varchar(30),
+	milage integer
+	);
+
+create table driver(
+	surname varchar(30),
+	firstName varchar(100),
+	dob date,
+	age integer,
+	sex bool,
+	licenseNumber varchar(30),
+	issuedDate date,
+	expiryDate date
+	);

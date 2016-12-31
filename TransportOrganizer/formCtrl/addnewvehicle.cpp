@@ -1,6 +1,7 @@
 #include "addnewvehicle.h"
 #include "ui_addnewvehicle.h"
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
 AddNewVehicle::AddNewVehicle(QWidget *parent, bool edit) :
     QDialog(parent),
     ui(new Ui::AddNewVehicle)
@@ -9,6 +10,7 @@ AddNewVehicle::AddNewVehicle(QWidget *parent, bool edit) :
     ui->setupUi(this);
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------------------
 void AddNewVehicle::SetupUi(bool edit)
 {
     if (edit)
@@ -20,10 +22,10 @@ void AddNewVehicle::SetupUi(bool edit)
     {
         setWindowTitle("Add New Vehicle");
     }
-
-
 }
+// -----------------------------------------------------------------------------------------------------------------------------------------
 AddNewVehicle::~AddNewVehicle()
 {
     delete ui;
 }
+// -----------------------------------------------------------------------------------------------------------------------------------------
