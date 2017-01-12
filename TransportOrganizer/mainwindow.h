@@ -16,6 +16,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    virtual bool initDBCons();
 
 private slots:
     void on_actionAdd_New_Vehicle_triggered();

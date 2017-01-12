@@ -9,6 +9,7 @@
 // -----------------------------------------------------------------------------------------------------------------------------------------
 #include <QMessageBox>
 #include <QStandardItemModel>
+#include <QLabel>
 
 // -----------------------------------------------------------------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget *parent) :
@@ -24,7 +25,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->tableView->setModel(model);*/
     //LoadConfigs();
-    // ConnectToDB();
+    QLabel* dbStatus = new QLabel;
+    ui->statusBar->addWidget(dbStatus,100);
+    if (!initDBCons())
+        dbStatus->setText("DB connection failed");
+    else
+        dbStatus->setText("Connected to DB");
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------
 MainWindow::~MainWindow()
@@ -59,3 +65,7 @@ void MainWindow::on_actionRegistered_Drivers_triggered()
 
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------
+bool MainWindow::initDBCons()
+{
+    return dbCon.connectToDB();
+}

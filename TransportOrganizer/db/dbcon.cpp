@@ -5,7 +5,7 @@
 DBCon::DBCon()
 {
     dbName = "QSQLITE"; // get from cfg
-    dbPath = "transportOrgMainDBx"; // get from cfg
+    dbPath   = "transportOrgMainDB"; // get from cfg
 }
 // -----------------------------------------------------------------------------------------------------------------------------------------
 bool DBCon::connectToDB()

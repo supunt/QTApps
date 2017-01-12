@@ -38,7 +38,8 @@ SOURCES += main.cpp\
     db/dbcolumn.cpp \
     db/dbtable.cpp \
     entities/entity.cpp \
-    entities/entityinstance.cpp
+    entities/entityinstance.cpp \
+    entities/dataload.cpp
 
 HEADERS  += mainwindow.h \
     formCtrl/addmailclient.h \
@@ -54,7 +55,8 @@ HEADERS  += mainwindow.h \
     db/dbcolumn.h \
     db/dbtable.h \
     entities/entity.h \
-    entities/entityinstance.h
+    entities/entityinstance.h \
+    entities/dataload.h
 
 FORMS    += uiFiles/mainwindow.ui \
     uiFiles/settingdialog.ui \
