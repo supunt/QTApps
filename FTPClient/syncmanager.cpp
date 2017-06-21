@@ -3,7 +3,6 @@
 #include "QProgressBar"
 #include "mainwindow.h"
 
-
 //-----------------------------------------------------------------------------------------------------------------------------------------
 syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewCtrl)
 {
@@ -12,6 +11,19 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
     _directoryScanner = new dirScanner(this);
     QString errStr = "";
 
+    int ftpThrCnt = MainWindow::getSetting("thread_count",QString::number(FTP_DEF_THREAD_COUNT)).toInt();
+
+    _ftpAgents = new ftpSenderDaemon*[ftpThrCnt];
+    QString err = "";
+    for (int i = 0; i < ftpThrCnt; ++i)
+    {
+        _ftpAgents[i] = new ftpSenderDaemon(this,i);
+        if(!_ftpAgents[i]->startDaemon(err))
+        {
+            // report to FE TODO
+            terminate();
+        }
+    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::run()

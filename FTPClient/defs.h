@@ -5,6 +5,9 @@
 #define MAIN_SCAN_INTERVAL_M_SEC 5000
 #define RETRY_SCAN_INTERVAL_M_SEC 60000
 
+#define FTP_DEF_THREAD_COUNT 4
+#define DEFAULT_SCAN_TIMER_INTERVAL 30
+
 //-----------------------------------------------------------------------------------------------------------------------------------------
 enum SOURCE
 {

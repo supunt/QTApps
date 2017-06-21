@@ -3,9 +3,12 @@
 
 #include "dirscanner.h"
 #include "abscallback.h"
-#include "QWidget"
-#include "QTimer"
 #include "qtablewidgetex.h"
+#include "ftpsenderdaemon.h"
+
+#include <QWidget>
+#include <QTimer>
+#include <QThread>
 //-----------------------------------------------------------------------------------------------------------------------------------------
 class syncManager :  public QObject, public Abscallback
 {
@@ -33,7 +36,7 @@ private:
     int  _syncInterval = 0;
 
      QString getSource(SOURCE source);
-
+    ftpSenderDaemon** _ftpAgents;
 private slots:
     void onDiscScanTimer();
 };

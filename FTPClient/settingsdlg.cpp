@@ -1,9 +1,12 @@
+#include "defs.h"
 #include "settingsdlg.h"
 #include "ui_settingsdlg.h"
+
 #include <QDebug>
 #include <QList>
 #include <mainwindow.h>
 #include <QFileDialog>
+#include <QAbstractButton>
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 settingsDlg::settingsDlg(QWidget *parent) :
@@ -17,7 +20,7 @@ settingsDlg::settingsDlg(QWidget *parent) :
 //-----------------------------------------------------------------------------------------------------------------------------------------
 settingsDlg::~settingsDlg()
 {
-    SaveSettings();
+    saveSettings();
     delete ui;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -43,7 +46,7 @@ void settingsDlg::LoadSettings()
     _generalSettings->endGroup();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void settingsDlg::SaveSettings()
+void settingsDlg::saveSettings()
 {
     _generalSettings->beginGroup("generalSettings");
     QList<QLineEdit*> listChildern = this->findChildren<QLineEdit*>();
@@ -85,6 +88,37 @@ void settingsDlg::setLogPath()
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::InitDefaultSettings()
 {
-    _defaultSettings["sync_interval"] = "10";
-    _defaultSettings["log_path"] = (QString(getenv("APPDATA")) +"\\Peercore\\FTPClient");
+    _defaultSettings[ui->sync_interval->objectName()] = QString::number(DEFAULT_SCAN_TIMER_INTERVAL);
+    _defaultSettings[ui->log_path->objectName()] = (QString(getenv("APPDATA")) +"\\Peercore\\FTPClient");
+    _defaultSettings[ui->thread_count->objectName()] = QString::number(FTP_DEF_THREAD_COUNT);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+QString settingsDlg::getDefaultSetting(QString key)
+{
+    auto ite = _defaultSettings.find(key);
+    if (ite == _defaultSettings.end())
+        return "";
+    else
+        return ite->second;
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void settingsDlg::resetSettings()
+{
+    QList<QLineEdit*> listChildern = this->findChildren<QLineEdit*>();
+
+    for (auto child : listChildern)
+    {
+        child->setText(getDefaultSetting(child->objectName()));
+        MainWindow::updateSetting(child->objectName(),child->text());
+    }
+
+    doPostChangeSettingValidations();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void settingsDlg::onActionBtnClick(QAbstractButton* btn)
+{
+    if (btn->objectName() == "Reset")
+        resetSettings();
+    else if (btn->objectName() == "Save")
+        saveSettings();
 }

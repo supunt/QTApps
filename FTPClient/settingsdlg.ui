@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>246</height>
+    <height>304</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>520</width>
-    <height>246</height>
+    <height>400</height>
    </size>
   </property>
   <property name="baseSize">
@@ -44,7 +44,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>210</y>
+     <y>270</y>
      <width>501</width>
      <height>32</height>
     </rect>
@@ -53,7 +53,7 @@
     <enum>Qt::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Reset|QDialogButtonBox::Save</set>
    </property>
   </widget>
   <widget class="QWidget" name="gridLayoutWidget">
@@ -73,15 +73,15 @@
       </property>
      </widget>
     </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="ftp_host"/>
+    </item>
     <item row="2" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
        <string>Remote User</string>
       </property>
      </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="ftp_host"/>
     </item>
     <item row="0" column="1">
      <widget class="QLineEdit" name="sync_interval">
@@ -111,13 +111,6 @@
      <widget class="QLabel" name="label_5">
       <property name="text">
        <string>Remote Password</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_6">
-      <property name="text">
-       <string>Log Path</string>
       </property>
      </widget>
     </item>
@@ -152,7 +145,14 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="1">
+    <item row="6" column="0">
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>Log Path</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QLineEdit" name="log_path">
@@ -169,6 +169,16 @@
        </widget>
       </item>
      </layout>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>FTP Daemons</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="thread_count"/>
     </item>
    </layout>
   </widget>
@@ -241,17 +251,17 @@
   </connection>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
+   <signal>clicked(QAbstractButton*)</signal>
    <receiver>settingsDlg</receiver>
-   <slot>SaveSettings()</slot>
+   <slot>onActionBtnClick(QAbstractButton*)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>411</x>
-     <y>224</y>
+     <x>401</x>
+     <y>230</y>
     </hint>
     <hint type="destinationlabel">
-     <x>417</x>
-     <y>247</y>
+     <x>398</x>
+     <y>248</y>
     </hint>
    </hints>
   </connection>
@@ -261,6 +271,6 @@
   <slot>checkSettings()</slot>
   <slot>setSyncDir()</slot>
   <slot>syncTimeChanged()</slot>
-  <slot>SaveSettings()</slot>
+  <slot>onActionBtnClick(QAbstractButton*)</slot>
  </slots>
 </ui>

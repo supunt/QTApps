@@ -25,7 +25,7 @@ public:
     static QString g_scanDirPath;
     static bool g_mainTblClr;
     static MAP_STR_STR _mapSettings;
-    static QString getSetting(QString key);
+    static QString getSetting(QString key,QString defVal = "");
     static void updateSetting(QString key, QString value);
 private:
     Ui::MainWindow *ui;
@@ -52,6 +52,7 @@ private slots:
     void onChangeSyncState();
     void onDirPathChange();
     void on_actionSettings_triggered();
+    void on_ScreenCountChange(int newScreenCount);
 };
 
 #endif // MAINWINDOW_H

@@ -30,7 +30,9 @@ SOURCES += main.cpp\
     syncmanager.cpp \
     abscallback.cpp \
     logger.cpp \
-    settingsdlg.cpp
+    settingsdlg.cpp \
+    qthreadex.cpp \
+    ftpsenderdaemon.cpp
 
 HEADERS  += mainwindow.h \
     qtablewidgetex.h \
@@ -39,7 +41,9 @@ HEADERS  += mainwindow.h \
     abscallback.h \
     defs.h \
     logger.h \
-    settingsdlg.h
+    settingsdlg.h \
+    qthreadex.h \
+    ftpsenderdaemon.h
 
 FORMS    += mainwindow.ui \
     settingsdlg.ui

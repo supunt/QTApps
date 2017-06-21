@@ -6,6 +6,7 @@
 #include <map>
 #include <QSettings>
 #include <abscallback.h>
+#include <QAbstractButton>
 
 typedef std::map<QString,QString> MAP_STR_STR;
 
@@ -27,7 +28,7 @@ private:
     Ui::settingsDlg *ui;
 
     QSettings* _generalSettings;
-    void LoadSettings();
+
 
      void doPostChangeSettingValidations();
     Abscallback* _syncManager = nullptr;
@@ -35,10 +36,14 @@ private:
     MAP_STR_STR _defaultSettings;
 
 private slots:
-    void SaveSettings();
+    void saveSettings();
+    void resetSettings();
     void checkSettings();
     void setLogPath();
     void InitDefaultSettings();
+    void onActionBtnClick(QAbstractButton* btn);
+    void LoadSettings();
+    QString getDefaultSetting(QString key);
 };
 
 #endif // SETTINGSDLG_H

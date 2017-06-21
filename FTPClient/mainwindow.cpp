@@ -6,6 +6,11 @@
 #include <QVBoxLayout>
 #include <QFileDialog>
 #include <QPalette>
+#include <QDesktopWidget>
+
+#define MOVE_BETWEEN_SCREENS_OFFSET_PX 200
+#define PRIMARY_SCREEN 0
+
 //-----------------------------------------------------------------------------------------------------------------------------------------
 QString MainWindow::g_scanDirPath = "";
 bool MainWindow::g_mainTblClr = false;
@@ -57,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->btnSync->setPalette(pal);
      ui->btnSync->update();
 
+     connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)),
+             this, SLOT(on_ScreenCountChange(int)));
      //------------------------------------------------------------
      _syncMan->run();
  }
@@ -77,12 +84,39 @@ void MainWindow::LoadSettings()
     const QPoint defaultloc =  this->pos();
      _appSetting->beginGroup("MainWindow");
 
-     resize(_appSetting->value("size", defaultSize).toSize());
-     move(_appSetting->value("pos", defaultloc).toPoint());
-
      ui->txt_path->setText(_appSetting->value("syncDir", MainWindow::g_scanDirPath).toString());
-      MainWindow::g_scanDirPath = ui->txt_path->text();
-     _mainTableColumns = _appSetting->value("mainTableCols").toStringList();
+     MainWindow::g_scanDirPath = ui->txt_path->text();
+    _mainTableColumns = _appSetting->value("mainTableCols").toStringList();
+
+    // Screen change after window close
+    int screenCnt = QApplication::desktop()->screenCount();
+    int lastScreen = _appSetting->value("screen", defaultSize).toInt();
+    QSize lastSize = _appSetting->value("size", defaultSize).toSize();
+    QPoint lastPoint = _appSetting->value("pos", defaultloc).toPoint();
+    QRect screenGeo;
+
+     if (lastScreen > screenCnt - 1)
+     {
+            screenGeo =  QApplication::desktop()->availableGeometry(PRIMARY_SCREEN);
+
+            if (lastSize.height() > screenGeo.height() - MOVE_BETWEEN_SCREENS_OFFSET_PX)
+                lastSize.setHeight(screenGeo.height() - MOVE_BETWEEN_SCREENS_OFFSET_PX);
+            if (lastSize.width() > screenGeo.width() - MOVE_BETWEEN_SCREENS_OFFSET_PX)
+                lastSize.setWidth(screenGeo.width()- MOVE_BETWEEN_SCREENS_OFFSET_PX);
+
+            lastPoint.setX(MOVE_BETWEEN_SCREENS_OFFSET_PX);
+            lastPoint.setY(MOVE_BETWEEN_SCREENS_OFFSET_PX);
+     }
+     else
+        screenGeo =  QApplication::desktop()->availableGeometry(PRIMARY_SCREEN);
+
+     if (screenGeo.height() == lastSize.height() && screenGeo.width() == lastSize.width())
+         showFullScreen();
+    else
+     {
+         resize(lastSize);
+         move(lastPoint);
+     }
      _appSetting->endGroup();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -91,6 +125,7 @@ void MainWindow::SaveSettings()
     _appSetting->beginGroup("MainWindow");
     _appSetting->setValue("size", size());
     _appSetting->setValue("pos", pos());
+    _appSetting->setValue("screen",QApplication::desktop()->screenNumber(this));
     _appSetting->setValue("syncDir",ui->txt_path->text());
     _appSetting->setValue("mainTableCols",_mainTableColumns);
     _appSetting->endGroup();
@@ -187,7 +222,7 @@ void MainWindow::on_actionSettings_triggered()
      _settingsDlg->show();
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
-QString MainWindow::getSetting(QString key)
+QString MainWindow::getSetting(QString key ,QString defVal)
 {
     MAP_STR_STR::iterator ite = MainWindow::_mapSettings.find(key);
     if (ite == MainWindow::_mapSettings.end())
@@ -195,7 +230,6 @@ QString MainWindow::getSetting(QString key)
     else
         return ite->second;
 }
-
 //----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::updateSetting(QString key, QString value)
 {
@@ -205,3 +239,32 @@ void MainWindow::updateSetting(QString key, QString value)
     else
         ite->second = value;
 }
+//----------------------------------------------------------------------------------------------------------------------------------------
+void MainWindow::on_ScreenCountChange(int newScreenCount)
+{
+    int currentScreen = QApplication::desktop()->screenNumber(this);
+
+    if (currentScreen < newScreenCount - 1)
+    {
+        QSize curSize = size();
+        bool fullScreen = isFullScreen();
+
+        if (fullScreen)
+        {
+            showFullScreen();
+            return;
+        }
+
+        QRect screenGeo =  QApplication::desktop()->availableGeometry(PRIMARY_SCREEN);
+        QPoint newPoint(MOVE_BETWEEN_SCREENS_OFFSET_PX,MOVE_BETWEEN_SCREENS_OFFSET_PX);
+
+        if (curSize.height() > screenGeo.height() - MOVE_BETWEEN_SCREENS_OFFSET_PX)
+            curSize.setHeight(screenGeo.height() - MOVE_BETWEEN_SCREENS_OFFSET_PX);
+        if (curSize.width() > screenGeo.width() - MOVE_BETWEEN_SCREENS_OFFSET_PX)
+            curSize.setWidth(screenGeo.width() - MOVE_BETWEEN_SCREENS_OFFSET_PX);
+
+        resize(curSize);
+        move(newPoint);
+    }
+}
+//----------------------------------------------------------------------------------------------------------------------------------------
