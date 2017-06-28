@@ -1,8 +1,9 @@
 #include "syncmanager.h"
-#include "QDebug"
-#include "QProgressBar"
 #include "mainwindow.h"
 
+#include <QDebug>
+#include <QProgressBar>
+#include <QtNetwork/QNetworkConfiguration>
 //-----------------------------------------------------------------------------------------------------------------------------------------
 syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewCtrl)
 {
@@ -17,13 +18,15 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
     QString err = "";
     for (int i = 0; i < ftpThrCnt; ++i)
     {
-        _ftpAgents[i] = new ftpSenderDaemon(this,i);
+        _ftpAgents[i] = new ftpSenderDaemon(this,i,_networkSession);
         if(!_ftpAgents[i]->startDaemon(err))
         {
             // report to FE TODO
             terminate();
         }
     }
+
+
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::run()
@@ -32,6 +35,12 @@ void syncManager::run()
     connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
     _syncInterval = MainWindow::getSetting("sync_interval").toInt();
     _scanLoopTimer->start(_syncInterval*1000);
+
+     _manager = new QNetworkConfigurationManager;
+    connect(_manager,SIGNAL(configurationChanged(const QNetworkConfiguration &)),
+            this,SLOT(onNetworkConfigChange(const QNetworkConfiguration &)));
+
+    initNetworkSession();
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
  void syncManager::onReportDirScanComplete()
@@ -94,6 +103,9 @@ void syncManager::run()
      if (!getSyncState())
          return;
 
+     if (!_networkSession || !_networkSession->isOpen())
+         return;
+
      QString err = "";
     if (!_directoryScanner->OnSyncTimer(err))
         qDebug() << err;
@@ -108,8 +120,11 @@ void syncManager::run()
      case FTP:
          return "FTP";
          break;
+     case NTWK:
+         return "Network";
+         break;
      default:
-         return "OTHER";
+         return "Other";
          break;
      }
  }
@@ -126,4 +141,86 @@ void syncManager::onScanTimerDurationChanged(int newDuration)
         _syncInterval = MainWindow::getSetting("sync_interval").toInt();
         _scanLoopTimer->start(_syncInterval*1000);
     }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onUploadStatusNotification(int pgbRow, int percentage)
+{
+
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onNetworkStateChanged(QNetworkSession::State state)
+{
+    qDebug() << "Network changed";
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onNetworkSessionError(QNetworkSession::SessionError error)
+{
+    reportError("Connection Error : " + _networkSession->errorString() + "(Network name : " +
+                _networkSession->configuration().name() + ", State : "
+                ,NTWK);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onNetworkConnEstablished()
+{
+        qDebug() <<  "Connected : " << _networkSession->configuration().name();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::initNetworkSession()
+{
+    if (_netConnTimer)
+        delete _netConnTimer;
+
+    if (_networkSession)
+        delete _networkSession;
+
+    QSettings networkSettings;
+    networkSettings.beginGroup("network");
+    const QString defNtwk = networkSettings.value("DefaultNetConfig").toString();
+    networkSettings.endGroup();
+
+    QNetworkConfiguration ntwkConfig = _manager->configurationFromIdentifier(defNtwk);
+    if ((ntwkConfig.state() & QNetworkConfiguration::Discovered) != QNetworkConfiguration::Discovered)
+    {
+           QList<QNetworkConfiguration> ntConf =_manager->allConfigurations(QNetworkConfiguration::Active);
+           for (auto cfg : ntConf)
+           {
+               // get rid of VMWare adapters
+               if (QNetworkConfiguration::BearerUnknown == cfg.bearerType())
+                   continue;
+               // TODO -  connecting to very first adaptor
+               qDebug() << cfg.bearerType() << "|" <<cfg.name();
+               ntwkConfig = cfg;
+               break;
+           }
+    }
+
+    if (ntwkConfig.name() == "")
+    {
+        _netConnTimer = new QTimer;
+        connect(_netConnTimer,SIGNAL(timeout()),this,SLOT(onNetworkReconnectTimer()));
+        _netConnTimer->start(2000);
+    }
+    _networkSession = new QNetworkSession(ntwkConfig,this);
+
+    // Slots for Network session callbacks
+
+    connect(_networkSession,SIGNAL(opened()),this,SLOT(onNetworkConnEstablished()));
+    connect(_networkSession, SIGNAL(error(QNetworkSession::SessionError)),
+                this, SLOT(onNetworkSessionError(QNetworkSession::SessionError)));
+    connect(_networkSession,SIGNAL(stateChanged(QNetworkSession::State)),
+                this,SLOT(onNetworkStateChanged(QNetworkSession::State)));
+
+    _networkSession->open();
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onNetworkReconnectTimer()
+{
+    initNetworkSession();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onNetworkConfigChange(const QNetworkConfiguration &config)
+{
+    qDebug() << "NTC C : " << config.name() <<", States : " <<  config.state() << ", family : " << config.bearerTypeFamily();
+    // fires for the adaptor family
 }

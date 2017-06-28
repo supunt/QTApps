@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT      += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -29,10 +30,14 @@ SOURCES += main.cpp\
     dirscanner.cpp \
     syncmanager.cpp \
     abscallback.cpp \
-    logger.cpp \
     settingsdlg.cpp \
     qthreadex.cpp \
-    ftpsenderdaemon.cpp
+    ftpsenderdaemon.cpp \
+    qt4_legacy/qftp.cpp \
+    qt4_legacy/qurlinfo.cpp \
+    changeSettingsNotificationCB.cpp \
+    settingObject.cpp \
+    logger/logger.cpp
 
 HEADERS  += mainwindow.h \
     qtablewidgetex.h \
@@ -40,10 +45,14 @@ HEADERS  += mainwindow.h \
     syncmanager.h \
     abscallback.h \
     defs.h \
-    logger.h \
     settingsdlg.h \
     qthreadex.h \
-    ftpsenderdaemon.h
+    ftpsenderdaemon.h \
+    qt4_legacy/qftp.h \
+    qt4_legacy/qurlinfo.h \
+    changeSettingsNotificationCB.h \
+    settingObject.h \
+    logger/logger.h
 
 FORMS    += mainwindow.ui \
     settingsdlg.ui
