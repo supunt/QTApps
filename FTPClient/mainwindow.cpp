@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "logger/logger.h"
 #include <QString>
 #include <QDebug>
 #include <QLayout>
@@ -7,6 +8,7 @@
 #include <QFileDialog>
 #include <QPalette>
 #include <QDesktopWidget>
+#include <QMessageBox>
 
 #define MOVE_BETWEEN_SCREENS_OFFSET_PX 200
 #define PRIMARY_SCREEN 0
@@ -31,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _errortableWidget = new QTableWidgetEx(this);
     _settingsDlg = new settingsDlg(this);
     _settingsDlg->hide();
-
+    SetDefaultDirPath();
     LoadSettings();
 
     initMainTableHeaders();
@@ -50,7 +52,6 @@ MainWindow::MainWindow(QWidget *parent) :
     layedoutWindow->setLayout(layout);
     setCentralWidget(layedoutWindow);
 
-    SetDefaultDirPath();
     ui->txt_path->setText(MainWindow::g_scanDirPath);
 
      _syncMan = new syncManager(_tableWidget,_errortableWidget);
@@ -61,6 +62,15 @@ MainWindow::MainWindow(QWidget *parent) :
      ui->btnSync->setAutoFillBackground(true);
      ui->btnSync->setPalette(pal);
      ui->btnSync->update();
+
+     QString err = "";
+     if (!logger::init(err,_syncMan))
+     {
+         QMessageBox messageBox;
+         messageBox.critical(0,"Error",err);
+         messageBox.setFixedSize(500,200);
+         return;
+     }
 
      connect(QApplication::desktop(), SIGNAL(screenCountChanged(int)),
              this, SLOT(on_ScreenCountChange(int)));
@@ -149,11 +159,11 @@ void MainWindow::SaveSettings()
   void MainWindow::initErrorTableHeaders()
   {
       QStringList titles;
-      titles << "Reporter" << "Error Message" <<  "Last reported time" << "Times Repeated";
-      _errortableWidget->setColumnCount(4);
+      titles << "Reporter" << "Message" <<  "Last reported time" << "Times Repeated" << "Type";
+      _errortableWidget->setColumnCount(5);
 
       _errortableWidget->setHorizontalHeaderLabels(titles);
-      for (int i = 0; i < 4 ; i++)
+      for (int i = 0; i < 5 ; i++)
          _errortableWidget->horizontalHeaderItem(i)->setTextAlignment(Qt::AlignLeft);
 
          _errortableWidget->resizeRowsToContents();
@@ -177,7 +187,10 @@ void MainWindow::SaveSettings()
         ui->txt_path->setText(MainWindow::g_scanDirPath);
 
         if (oldPath != MainWindow::g_scanDirPath)
+        {
             MainWindow::g_mainTblClr = !MainWindow::g_mainTblClr; // flip color to indicate dir change
+            _syncMan->report("Sync directory changed to :" + MainWindow::g_scanDirPath, MAINWND, WARNING);
+        }
 
         _syncMan->setSyncState(true);
    }
@@ -187,12 +200,14 @@ void MainWindow::onChangeSyncState()
     QPalette pal = ui->btnSync->palette();
     if (_syncMan->getSyncState())
     {
+        _syncMan->report("Haulting sync.",MAINWND,WARNING);
         ui->btnSync->setText("Start sync");
         _syncMan->setSyncState(false);
         pal.setColor(QPalette::Button, QColor(Qt::green));
     }
     else
     {
+        _syncMan->report("Resuming sync.",MAINWND,TEXT);
          ui->btnSync->setText("Pause sync");
          _syncMan->setSyncState(true);
           pal.setColor(QPalette::Button, QColor(Qt::red));
@@ -214,7 +229,10 @@ void MainWindow::onDirPathChange()
     MainWindow::g_scanDirPath = ui->txt_path->text();
 
     if (oldPath != MainWindow::g_scanDirPath)
+    {
+        _syncMan->report("Sync directory changed to :" + MainWindow::g_scanDirPath, MAINWND, WARNING);
         MainWindow::g_mainTblClr = !MainWindow::g_mainTblClr; // flip
+    }
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::on_actionSettings_triggered()
@@ -237,7 +255,12 @@ void MainWindow::updateSetting(QString key, QString value)
     if (ite == MainWindow::_mapSettings.end())
         return;
     else
+    {
+        logger::log("Setting change : [Setting : " + ite->first +
+                    ", Old Value - "+ ite->second +
+                    ", New value - " + value + "].");
         ite->second = value;
+    }
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::on_ScreenCountChange(int newScreenCount)

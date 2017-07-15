@@ -52,7 +52,8 @@ HEADERS  += mainwindow.h \
     qt4_legacy/qurlinfo.h \
     changeSettingsNotificationCB.h \
     settingObject.h \
-    logger/logger.h
+    logger/logger.h \
+    utils.h
 
 FORMS    += mainwindow.ui \
     settingsdlg.ui

@@ -1,6 +1,8 @@
 #ifndef SYNCMANAGER_H
 #define SYNCMANAGER_H
 
+#pragma once
+
 #include "dirscanner.h"
 #include "abscallback.h"
 #include "qtablewidgetex.h"
@@ -20,12 +22,12 @@ public:
 
     void setSyncState(bool state) {_syncState = state;};
     bool getSyncState() {return _syncState;};
-    bool sendToFTP(VEC_FI* newFiles);
+    bool sendToFTP(QFileInfo* newFiles, int rowNum);
     void run();
 
     //---------------- AbsCB
     void onReportDirScanComplete();
-    void reportError(QString err, SOURCE source = DIR_SC);
+    void report(QString err, SOURCE source = DIR_SC, TWE type = TEXT);
     void onScanTimerDurationChanged(int newDuration);
     void onUploadStatusNotification(int pgbRow, int percentage);
 
@@ -39,11 +41,11 @@ private:
     bool _syncState = true;
     int  _syncInterval = 0;
 
-    QString getSource(SOURCE source);
     void initNetworkSession();
     ftpSenderDaemon** _ftpAgents;
     QNetworkSession* _networkSession    = nullptr;
     QNetworkConfigurationManager* _manager  = nullptr;
+
 private slots:
     void onDiscScanTimer();
     void onNetworkStateChanged(QNetworkSession::State state);

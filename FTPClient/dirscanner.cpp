@@ -16,7 +16,7 @@ bool dirScanner::OnSyncTimer(QString& err)
     if (MainWindow::g_scanDirPath == "")
     {
         err = "Scan directory path is empty. Please set the scan directory path.";
-         _listner->reportError("Scan directory path is empty. Please set the scan directory path", DIR_SC);
+         _listner->report("Scan directory path is empty. Please set the scan directory path", DIR_SC, ERROR);
         return false;
     }
     else
@@ -26,7 +26,7 @@ bool dirScanner::OnSyncTimer(QString& err)
         {
             //- windows does not allow existance of dir and file in same name.
              err = "Scan directory path is does not exist. : ";
-              _listner->reportError(err +  MainWindow::g_scanDirPath, DIR_SC);
+              _listner->report(err +  MainWindow::g_scanDirPath, DIR_SC, ERROR);
             return false;
         }
         else

@@ -1,5 +1,6 @@
 #include "qthreadex.h"
 #include <QDebug>
+#include "logger/logger.h"
 //-----------------------------------------------------------------------------------------------------------------------------------------
 QThreadEx::QThreadEx(int tid)
 {
@@ -8,5 +9,5 @@ QThreadEx::QThreadEx(int tid)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void QThreadEx::run()
 {
-    qDebug() << "Running child thread : " << _tid;
+    logger::log("FTP Thread " +  QString::number(_tid) + "|" + "FTP daemon " + QString::number(_tid) + " started.");
 }

@@ -1,9 +1,13 @@
 #include "syncmanager.h"
 #include "mainwindow.h"
+#include "logger/logger.h"
+#include "utils.h"
 
 #include <QDebug>
 #include <QProgressBar>
 #include <QtNetwork/QNetworkConfiguration>
+
+using namespace std;
 //-----------------------------------------------------------------------------------------------------------------------------------------
 syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewCtrl)
 {
@@ -15,17 +19,9 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
     int ftpThrCnt = MainWindow::getSetting("thread_count",QString::number(FTP_DEF_THREAD_COUNT)).toInt();
 
     _ftpAgents = new ftpSenderDaemon*[ftpThrCnt];
-    QString err = "";
-    for (int i = 0; i < ftpThrCnt; ++i)
-    {
-        _ftpAgents[i] = new ftpSenderDaemon(this,i,_networkSession);
-        if(!_ftpAgents[i]->startDaemon(err))
-        {
-            // report to FE TODO
-            terminate();
-        }
-    }
 
+    for (int i = 0; i < ftpThrCnt; ++i)
+        _ftpAgents[i] = new ftpSenderDaemon(this,i,_networkSession);
 
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -40,6 +36,15 @@ void syncManager::run()
     connect(_manager,SIGNAL(configurationChanged(const QNetworkConfiguration &)),
             this,SLOT(onNetworkConfigChange(const QNetworkConfiguration &)));
 
+     int ftpThrCnt = MainWindow::getSetting("thread_count",QString::number(FTP_DEF_THREAD_COUNT)).toInt();
+    QString err = "";
+
+    for (int i = 0; i < ftpThrCnt; ++i)
+        if(!_ftpAgents[i]->startDaemon(err))
+        {
+
+        }
+
     initNetworkSession();
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -47,30 +52,44 @@ void syncManager::run()
  {
         VEC_FI* newFiles = _directoryScanner->getNewlyAddedFiles();
 
+        report("Directory scan run. "+
+               ((newFiles->size() == 0) ? "No":QString::number(newFiles->size())) +
+               " new files detected.", SYNCMAN, TEXT);
+
         int num = 0;
          for (auto file : *newFiles)
+         {
              ((QTableWidgetEx*)_mainViewCtrl)->Insert_Row(file,num);
-
-        sendToFTP(newFiles);
+             sendToFTP(file,num);
+         }
  }
  //-----------------------------------------------------------------------------------------------------------------------------------------
-  bool syncManager::sendToFTP(VEC_FI* newFiles)
+  bool syncManager::sendToFTP(QFileInfo* newFiles, int rowNum)
   {
-          int row = _mainViewCtrl->rowCount() - newFiles->size();
-          for (auto file : *newFiles)
-          {
-              QWidget* wi =_mainViewCtrl->cellWidget(row,3);
-              for (int i= 0; i < 100; i++)
-                ((QProgressBar*)wi)->setValue(i);
-
-              row++;
-          }
+         QWidget* wi =_mainViewCtrl->cellWidget(rowNum,3);
+        // wi is the callback;
 
           return true;
   }
  //-----------------------------------------------------------------------------------------------------------------------------------------
- void syncManager::reportError(QString err, SOURCE source)
+ void syncManager::report(QString err, SOURCE source, TWE type)
  {
+     switch(type)
+     {
+        case TEXT:
+         logger::log(err);
+         break;
+     case WARNING:
+         logger::logWarn(err);
+         break;
+     case ERROR:
+         logger::logError(err);
+         break;
+     default:
+         logger::log(err);
+         break;
+     }
+
      if (_errorViewCtrl->isHidden())
      {
          QSize size = _errorViewCtrl->size();
@@ -93,6 +112,8 @@ void syncManager::run()
          er->_err = err;
          er->_count = 1;
          er->_dt = QDateTime::currentDateTime();
+         er->_type = type;
+
          _lastError = er;
          ((QTableWidgetEx*)_errorViewCtrl)->Insert_Row(er,er->_index);
     }
@@ -108,25 +129,7 @@ void syncManager::run()
 
      QString err = "";
     if (!_directoryScanner->OnSyncTimer(err))
-        qDebug() << err;
- }
- //-----------------------------------------------------------------------------------------------------------------------------------------
- QString syncManager::getSource(SOURCE source)
- {
-     switch (source) {
-     case DIR_SC:
-         return "File Scanner";
-         break;
-     case FTP:
-         return "FTP";
-         break;
-     case NTWK:
-         return "Network";
-         break;
-     default:
-         return "Other";
-         break;
-     }
+        report(err,DIR_SC,ERROR);
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onScanTimerDurationChanged(int newDuration)
@@ -136,10 +139,14 @@ void syncManager::onScanTimerDurationChanged(int newDuration)
         if (_scanLoopTimer)
             delete _scanLoopTimer;
 
+        report("Sync interval changed from " + QString::number(_syncInterval) +
+               " seconds to " + QString::number(newDuration) + " seconds.", SYNCMAN, WARNING);
+
         _scanLoopTimer = new QTimer;
         connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
         _syncInterval = MainWindow::getSetting("sync_interval").toInt();
         _scanLoopTimer->start(_syncInterval*1000);
+
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -150,19 +157,25 @@ void syncManager::onUploadStatusNotification(int pgbRow, int percentage)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkStateChanged(QNetworkSession::State state)
 {
-    qDebug() << "Network changed";
+    /*logger::log("Connected to network changed %s [New state %s]",
+                    _networkSession->configuration().name(),
+                     getStateStr()); */
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkSessionError(QNetworkSession::SessionError error)
 {
-    reportError("Connection Error : " + _networkSession->errorString() + "(Network name : " +
+    report("Connection Error : " + _networkSession->errorString() + "(Network name : " +
                 _networkSession->configuration().name() + ", State : "
-                ,NTWK);
+                ,NTWK, ERROR);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkConnEstablished()
 {
-        qDebug() <<  "Connected : " << _networkSession->configuration().name();
+    logger::log("Sync Manager Thread | Connected to network '" + _networkSession->configuration().name() +
+                "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].");
+
+    report("Connected to network '" + _networkSession->configuration().name() +
+           "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].",SYNCMAN, SUCCESS);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::initNetworkSession()
@@ -188,7 +201,6 @@ void syncManager::initNetworkSession()
                if (QNetworkConfiguration::BearerUnknown == cfg.bearerType())
                    continue;
                // TODO -  connecting to very first adaptor
-               qDebug() << cfg.bearerType() << "|" <<cfg.name();
                ntwkConfig = cfg;
                break;
            }
@@ -196,9 +208,11 @@ void syncManager::initNetworkSession()
 
     if (ntwkConfig.name() == "")
     {
+        report("Cannot connnet to network, starting reconnect timer",SYNCMAN, ERROR);
         _netConnTimer = new QTimer;
         connect(_netConnTimer,SIGNAL(timeout()),this,SLOT(onNetworkReconnectTimer()));
         _netConnTimer->start(2000);
+        return;
     }
     _networkSession = new QNetworkSession(ntwkConfig,this);
 
@@ -212,7 +226,6 @@ void syncManager::initNetworkSession()
 
     _networkSession->open();
 }
-
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkReconnectTimer()
 {
@@ -221,6 +234,13 @@ void syncManager::onNetworkReconnectTimer()
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkConfigChange(const QNetworkConfiguration &config)
 {
-    qDebug() << "NTC C : " << config.name() <<", States : " <<  config.state() << ", family : " << config.bearerTypeFamily();
-    // fires for the adaptor family
+    if ( config.bearerTypeName() == "Unknown")
+        return;
+
+    QString stateStr = getNetworkStatusString(config.state());
+
+    report("Network connection change detected [ Name : " +
+            config.name() + ", Type : " +
+           config.bearerTypeName() + ", state : " +
+           stateStr + "]", NTWK, (stateStr == "Connected")?SUCCESS:ERROR);
 }

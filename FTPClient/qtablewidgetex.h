@@ -7,13 +7,14 @@
 #include "QFileInfo"
 #include "QDateTime"
 #include "QProgressBar"
-
+#include "defs.h"
 //-----------------------------------------------------------------------------------------------------------------------------------------
 struct fe_error
 {
     QString _err;
     QString _source;
     QDateTime _dt;
+    TWE  _type;
     int _count;
     int _index;
 };
@@ -41,6 +42,17 @@ private:
     size_t const _dt_qprogressbar_hash = typeid(QProgressBar).hash_code();
 
      QColor _mian_tbl_color[2];
+
+     QString getTypeStr(TWE type)
+     {
+         switch(type)
+         {
+             case ERROR: return "ERROR"; break;
+             case WARNING: return "WARNING"; break;
+             case SUCCESS: return "INFO"; break;
+             default : return "TEXT"; break;
+         }
+     }
 };
 
 #endif // QTABLEWIDGETEX_H

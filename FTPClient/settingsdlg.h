@@ -1,5 +1,6 @@
 #ifndef SETTINGSDLG_H
 #define SETTINGSDLG_H
+#pragma once
 
 #include <QDialog>
 #include <QString>
@@ -28,7 +29,6 @@ private:
     Ui::settingsDlg *ui;
 
     QSettings* _generalSettings;
-
 
      void doPostChangeSettingValidations();
     Abscallback* _syncManager = nullptr;

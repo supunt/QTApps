@@ -10,6 +10,8 @@
 #include <QtNetwork/QNetworkSession>
 #include <QProgressBar>
 
+class syncManager;
+
 class ftpSenderDaemon : public QObject
 {
     Q_OBJECT
@@ -22,16 +24,19 @@ public:
 
 private:
     QThreadEx* _thread;
-    Abscallback* _syncManager;
+    syncManager* _syncManager;
     int _tid;
 
     QFtp *_ftp;
     QFile *_file;
     QNetworkSession* _ntwkSesstion;
+    QString _host;
+    QString _user;
+    QString _pass;
 
-signals:
-
-public slots:
+private slots:
+    void thread_start();
+    void ftpCommandFinished(int comId,bool error);
 };
 
 #endif // FTPSENDERDAEMON_H

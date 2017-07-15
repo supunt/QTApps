@@ -183,8 +183,50 @@
    </layout>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>sync_interval</tabstop>
+  <tabstop>ftp_host</tabstop>
+  <tabstop>ftp_user</tabstop>
+  <tabstop>ftp_pass</tabstop>
+  <tabstop>btn_testSettings</tabstop>
+  <tabstop>thread_count</tabstop>
+  <tabstop>log_path</tabstop>
+  <tabstop>btn_setLogPath</tabstop>
+ </tabstops>
  <resources/>
  <connections>
+  <connection>
+   <sender>btn_setLogPath</sender>
+   <signal>clicked()</signal>
+   <receiver>settingsDlg</receiver>
+   <slot>setLogPath()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>477</x>
+     <y>189</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>454</x>
+     <y>277</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>btn_testSettings</sender>
+   <signal>clicked()</signal>
+   <receiver>settingsDlg</receiver>
+   <slot>checkSettings()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>508</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>278</y>
+    </hint>
+   </hints>
+  </connection>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
@@ -214,38 +256,6 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_setLogPath</sender>
-   <signal>clicked()</signal>
-   <receiver>settingsDlg</receiver>
-   <slot>setLogPath()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>477</x>
-     <y>189</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>454</x>
-     <y>277</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_testSettings</sender>
-   <signal>clicked()</signal>
-   <receiver>settingsDlg</receiver>
-   <slot>checkSettings()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>508</x>
-     <y>146</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>345</x>
-     <y>278</y>
     </hint>
    </hints>
   </connection>

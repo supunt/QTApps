@@ -1,7 +1,7 @@
 #ifndef SETTINGOBJECT_H
 #define SETTINGOBJECT_H
 
-
+#pragma once
 class settingObject
 {
 public:

@@ -4,6 +4,7 @@
 
 #include <QDebug>
 #include <QList>
+#include <QDir>
 #include <mainwindow.h>
 #include <QFileDialog>
 #include <QAbstractButton>
@@ -89,7 +90,7 @@ void settingsDlg::setLogPath()
 void settingsDlg::InitDefaultSettings()
 {
     _defaultSettings[ui->sync_interval->objectName()] = QString::number(DEFAULT_SCAN_TIMER_INTERVAL);
-    _defaultSettings[ui->log_path->objectName()] = (QString(getenv("APPDATA")) +"\\Peercore\\FTPClient");
+    _defaultSettings[ui->log_path->objectName()] = QDir::tempPath() +"\\Peercore\\FTPClient";
     _defaultSettings[ui->thread_count->objectName()] = QString::number(FTP_DEF_THREAD_COUNT);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -117,8 +118,10 @@ void settingsDlg::resetSettings()
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::onActionBtnClick(QAbstractButton* btn)
 {
-    if (btn->objectName() == "Reset")
+    if (btn == ui->buttonBox->button(QDialogButtonBox::Reset))
         resetSettings();
-    else if (btn->objectName() == "Save")
+    else if (btn == ui->buttonBox->button(QDialogButtonBox::Save))
         saveSettings();
+    else if (btn == ui->buttonBox->button(QDialogButtonBox::Cancel))
+       hide();
 }

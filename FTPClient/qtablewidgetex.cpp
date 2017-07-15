@@ -30,12 +30,22 @@ void QTableWidgetEx::Insert_Row(fe_error* err, int& rownum)
 {
     rownum  = rowCount();
     insertRow(rownum);
-    QColor qc(255,94,99);
+    QColor qc;
+
+    switch (err->_type)
+    {
+        case WARNING: qc.setRgb(255,255,157);break;
+        case ERROR: qc.setRgb(255,94,99);break;
+        case SUCCESS:qc.setRgb(111,255,111);break;
+        default : qc.setRgb(255,255,255);break;
+    }
+    QString status = getTypeStr(err->_type);
 
     setCellData(rownum,0,&err->_source,&qc);
     setCellData(rownum,1,&err->_err, &qc);
     setCellData(rownum,2,&err->_dt,&qc);
     setCellData(rownum,3,&err->_count,&qc);
+    setCellData(rownum,4,&status,&qc);
 
     resizeRowsToContents();
     resizeColumnsToContents();
