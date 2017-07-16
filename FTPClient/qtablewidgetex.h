@@ -26,13 +26,13 @@ public:
     void Insert_Row(QFileInfo* qfi, int& rownum);
     void Insert_Row(fe_error* err, int& rownum);
     void updateCellValue(int row,int column, QString val);
-private:
+
     template <typename T>
     void setCellData(int row,
                             int column,
                              T* data,
                             QColor* cellColor = nullptr);
-
+private:
     //---------- general hash codes we are going to use
     size_t const _dt_int_hash = typeid(int).hash_code();
     size_t const _dt_double_hash= typeid(double).hash_code();

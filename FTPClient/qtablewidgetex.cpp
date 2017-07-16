@@ -17,9 +17,18 @@ void QTableWidgetEx::Insert_Row(QFileInfo* qfi, int& rownum)
     qint64 temp = 0;
     setCellData(rownum,0,&qfi->fileName(),&qc);
     temp = qfi->size();
+    QProgressBar* pgb = new QProgressBar();
+
+
+    pgb->setMinimum(0);
+    if (temp == 0)
+        pgb->setMaximum(1);
+    else
+        pgb->setMaximum(temp);
+
     setCellData(rownum,1,&temp,&qc);
     setCellData(rownum,2,&qfi->created(),&qc);
-    setCellData(rownum,3,new QProgressBar(),&qc);
+    setCellData(rownum,3,pgb,&qc);
     setCellData(rownum,4,&qfi->absoluteFilePath(),&qc);
 
     resizeRowsToContents();
@@ -28,7 +37,7 @@ void QTableWidgetEx::Insert_Row(QFileInfo* qfi, int& rownum)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void QTableWidgetEx::Insert_Row(fe_error* err, int& rownum)
 {
-    rownum  = rowCount();
+    rownum  = 0;
     insertRow(rownum);
     QColor qc;
 
@@ -81,7 +90,6 @@ void QTableWidgetEx::setCellData(int row, int column, T* data, QColor* cellColor
             twi = new QTableWidgetItem(*((QString*)data));
     else if (tid_hash == _dt_qprogressbar_hash)
     {
-         ((QProgressBar*)data)->setRange(0,100);
          setCellWidget(row,column,(QProgressBar*)data);
          return; // do not continue as this is a widget
     }

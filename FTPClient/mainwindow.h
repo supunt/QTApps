@@ -31,12 +31,14 @@ private:
     Ui::MainWindow *ui;
     QTableWidgetEx* _tableWidget;
     QTableWidgetEx* _errortableWidget;
+    QTableWidgetEx* _statTableWidget;
     syncManager* _syncMan;
     QSettings* _appSetting;
     QStringList _mainTableColumns;
 
      void initMainTableHeaders();
      void initErrorTableHeaders();
+     void initStatTableHeaders();
      void SetDefaultDirPath();
      void LoadSettings();
      void SaveSettings();

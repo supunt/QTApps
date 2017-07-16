@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     _tableWidget = new QTableWidgetEx(this);
     _errortableWidget = new QTableWidgetEx(this);
+    _statTableWidget = new QTableWidgetEx(this);
     _settingsDlg = new settingsDlg(this);
     _settingsDlg->hide();
     SetDefaultDirPath();
@@ -38,15 +39,28 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initMainTableHeaders();
     initErrorTableHeaders();
+    initStatTableHeaders();
    _errortableWidget->hide();
 
     QVBoxLayout *layout = new QVBoxLayout;
     QWidget* topLayout = new QWidget;
     topLayout->setLayout(ui->topLayout);
 
+     QWidget* lhWidget = new QWidget;
+     QHBoxLayout *lowerHorizontal = new QHBoxLayout;
+     lowerHorizontal->addWidget(_errortableWidget);
+     lowerHorizontal->addWidget(_statTableWidget);
+     lhWidget->setLayout(lowerHorizontal);
+
+     lowerHorizontal->setStretch(0,5);
+     lowerHorizontal->setStretch(1,1);
+
     layout->addWidget(topLayout);
     layout->addWidget(_tableWidget);
-    layout->addWidget(_errortableWidget);
+    layout->addWidget(lhWidget);
+
+    layout->setStretch(1,2);
+    layout->setStretch(2,1);
 
     QWidget* layedoutWindow = new QWidget;
     layedoutWindow->setLayout(layout);
@@ -54,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->txt_path->setText(MainWindow::g_scanDirPath);
 
-     _syncMan = new syncManager(_tableWidget,_errortableWidget);
+     _syncMan = new syncManager(_tableWidget,_errortableWidget,_statTableWidget);
     _settingsDlg->setCallback(_syncMan);
 
      QPalette pal = ui->btnSync->palette();
@@ -170,6 +184,21 @@ void MainWindow::SaveSettings()
          _errortableWidget->resizeColumnsToContents();
          _errortableWidget->setUpdatesEnabled(true);
   }
+  //----------------------------------------------------------------------------------------------------------------------------------------
+   void MainWindow::initStatTableHeaders()
+   {
+       QStringList titles;
+       titles << "Stat" << "Count" ;
+       _statTableWidget->setColumnCount(2);
+
+       _statTableWidget->setHorizontalHeaderLabels(titles);
+       for (int i = 0; i < 2 ; i++)
+          _statTableWidget->horizontalHeaderItem(i)->setTextAlignment(Qt::AlignLeft);
+
+          _statTableWidget->resizeRowsToContents();
+          _statTableWidget->resizeColumnsToContents();
+          _statTableWidget->setUpdatesEnabled(true);
+   }
   //----------------------------------------------------------------------------------------------------------------------------------------
    void MainWindow::onClickSetDirectory()
    {

@@ -9,10 +9,13 @@
 
 using namespace std;
 //-----------------------------------------------------------------------------------------------------------------------------------------
-syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewCtrl)
+syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewCtrl,
+                         QTableWidgetEx* startViewCtrl)
 {
     _mainViewCtrl = mainViewCtrl;
     _errorViewCtrl = errorViewCtrl;
+    _statViewCtrl   = startViewCtrl;
+
     _directoryScanner = new dirScanner(this);
     QString errStr = "";
 
@@ -32,6 +35,10 @@ void syncManager::run()
     _syncInterval = MainWindow::getSetting("sync_interval").toInt();
     _scanLoopTimer->start(_syncInterval*1000);
 
+    _statTimer = new QTimer;
+    connect(_statTimer,SIGNAL(timeout()),this,SLOT(onStatTimer()));
+    _statTimer->start(5000);
+
      _manager = new QNetworkConfigurationManager;
     connect(_manager,SIGNAL(configurationChanged(const QNetworkConfiguration &)),
             this,SLOT(onNetworkConfigChange(const QNetworkConfiguration &)));
@@ -39,12 +46,12 @@ void syncManager::run()
      int ftpThrCnt = MainWindow::getSetting("thread_count",QString::number(FTP_DEF_THREAD_COUNT)).toInt();
     QString err = "";
 
-    for (int i = 0; i < ftpThrCnt; ++i)
+    /*for (int i = 0; i < ftpThrCnt; ++i)
         if(!_ftpAgents[i]->startDaemon(err))
         {
 
-        }
-
+        }*/
+    _ftpAgents[0]->startDaemon(err);
     initNetworkSession();
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -58,18 +65,65 @@ void syncManager::run()
 
         int num = 0;
          for (auto file : *newFiles)
-         {
+         {  
              ((QTableWidgetEx*)_mainViewCtrl)->Insert_Row(file,num);
-             sendToFTP(file,num);
+             _mainTransferQueue.push(new PAIR_FI_I(file,num));
          }
+         newFiles->clear();
+         processNextInMasterQueue();
  }
- //-----------------------------------------------------------------------------------------------------------------------------------------
-  bool syncManager::sendToFTP(QFileInfo* newFiles, int rowNum)
-  {
-         QWidget* wi =_mainViewCtrl->cellWidget(rowNum,3);
-        // wi is the callback;
 
-          return true;
+  //-----------------------------------------------------------------------------------------------------------------------------------------
+   void syncManager::processNextInMasterQueue()
+   {
+       if (_mainTransferQueue.size() == 0)
+            return;
+
+       auto dataPair =_mainTransferQueue.front();
+       if(_ftpAgents[0]->getClient())
+        _ftpAgents[0]->sendFile(dataPair);
+       return;
+   }
+//-----------------------------------------------------------------------------------------------------------------------------------------
+  void syncManager::onFileUploadStatus(PAIR_FI_I* fileinfo, bool status)
+  {
+      if (!_mainTransferQueue.empty())
+      {
+          auto dataPair =_mainTransferQueue.front();
+          _mainTransferQueue.pop();
+          delete dataPair;
+      }
+    QProgressBar* wi =(QProgressBar*)_mainViewCtrl->cellWidget(fileinfo->second,3);
+    if (!status)
+    {
+        wi->setValue(0);
+        PAIR_FI_I* fi = new PAIR_FI_I;
+        fi->first = fileinfo->first;
+        fi->second = fileinfo->second;
+        _retryTransferQueue.push(fi);
+    }
+    else
+    {
+        if (fileinfo->first->size() == 0)
+        {
+            wi->setMaximum(1);
+            wi->setValue(1);
+        }
+        else
+        {
+            wi->setMaximum(fileinfo->first->size());
+            wi->setValue(fileinfo->first->size());
+        }
+        processNextInMasterQueue();
+    }
+  }
+  //-----------------------------------------------------------------------------------------------------------------------------------------
+  void syncManager::onFileUploadProgress(PAIR_FI_I *fileinfo, qint64 now, qint64 total)
+  {
+        QProgressBar* wi =(QProgressBar*)_mainViewCtrl->cellWidget(fileinfo->second,3);
+
+        wi->setMaximum(total);
+        wi->setValue(now);
   }
  //-----------------------------------------------------------------------------------------------------------------------------------------
  void syncManager::report(QString err, SOURCE source, TWE type)
@@ -171,11 +225,8 @@ void syncManager::onNetworkSessionError(QNetworkSession::SessionError error)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkConnEstablished()
 {
-    logger::log("Sync Manager Thread | Connected to network '" + _networkSession->configuration().name() +
-                "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].");
-
     report("Connected to network '" + _networkSession->configuration().name() +
-           "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].",SYNCMAN, SUCCESS);
+           "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].",SYNCMAN, TEXT);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::initNetworkSession()
@@ -243,4 +294,33 @@ void syncManager::onNetworkConfigChange(const QNetworkConfiguration &config)
             config.name() + ", Type : " +
            config.bearerTypeName() + ", state : " +
            stateStr + "]", NTWK, (stateStr == "Connected")?SUCCESS:ERROR);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onStatTimer()
+{
+    int mainQsize =_mainTransferQueue.size();
+    int retryQsize =_retryTransferQueue.size();
+    if (_statViewCtrl->rowCount() == 0)
+    {
+        _statViewCtrl->insertRow(0);
+        QColor qc;
+        qc.setRgb(255,255,255);
+        QString* mqs = new QString("Main Queue size");
+
+        _statViewCtrl->setCellData(0,0,mqs,&qc);
+        _statViewCtrl->setCellData(0,1,&mainQsize, &qc);
+
+        _statViewCtrl->insertRow(1);
+        QString* rqs = new QString("Retry Queue size");
+        _statViewCtrl->setCellData(1,0,rqs,&qc);
+        _statViewCtrl->setCellData(1,1,&retryQsize, &qc);
+
+        _statViewCtrl->resizeRowsToContents();
+        _statViewCtrl->resizeColumnsToContents();
+    }
+    else
+    {
+        _statViewCtrl->updateCellValue(0,1, QString::number(_mainTransferQueue.size()));
+        _statViewCtrl->updateCellValue(1,1, QString::number(_retryTransferQueue.size()));
+    }
 }
