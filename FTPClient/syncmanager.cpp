@@ -70,14 +70,20 @@ void syncManager::run()
              _mainTransferQueue.push(new PAIR_FI_I(file,num));
          }
          newFiles->clear();
-         processNextInMasterQueue();
+
+         if (!_mainQProcessing)
+            processNextInMasterQueue();
  }
 
   //-----------------------------------------------------------------------------------------------------------------------------------------
    void syncManager::processNextInMasterQueue()
    {
+       _mainQProcessing = true;
        if (_mainTransferQueue.size() == 0)
+       {
+           _mainQProcessing = false;
             return;
+       }
 
        auto dataPair =_mainTransferQueue.front();
        if(_ftpAgents[0]->getClient())

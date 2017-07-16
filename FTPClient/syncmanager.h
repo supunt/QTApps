@@ -48,6 +48,7 @@ private:
     fe_error*      _lastError = nullptr;
     bool _syncState = true;
     int  _syncInterval = 0;
+    bool _mainQProcessing = false;
 
     void initNetworkSession();
     void processNextInMasterQueue();
