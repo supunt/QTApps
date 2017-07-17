@@ -30,30 +30,28 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::run()
 {
-    _scanLoopTimer = new QTimer;
-    connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
-    _syncInterval = MainWindow::getSetting("sync_interval").toInt();
-    _scanLoopTimer->start(_syncInterval*1000);
-
-    _statTimer = new QTimer;
-    connect(_statTimer,SIGNAL(timeout()),this,SLOT(onStatTimer()));
-    _statTimer->start(5000);
-
      _manager = new QNetworkConfigurationManager;
     connect(_manager,SIGNAL(configurationChanged(const QNetworkConfiguration &)),
             this,SLOT(onNetworkConfigChange(const QNetworkConfiguration &)));
 
-     int ftpThrCnt = MainWindow::getSetting("thread_count",QString::number(FTP_DEF_THREAD_COUNT)).toInt();
-    QString err = "";
-
-    /*for (int i = 0; i < ftpThrCnt; ++i)
-        if(!_ftpAgents[i]->startDaemon(err))
-        {
-
-        }*/
-    _ftpAgents[0]->startDaemon(err);
     initNetworkSession();
  }
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::createTimers()
+{
+    _scanLoopTimer = new QTimer;
+    connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
+    _syncInterval = MainWindow::getSetting("sync_interval").toInt();
+    _scanLoopTimer->start(_syncInterval*1000);
+    report("Disk scan timer started [Scan interval : " + QString::number(_syncInterval) +
+                " seconds]",SYNCMAN,TEXT);
+
+    _statTimer = new QTimer;
+    connect(_statTimer,SIGNAL(timeout()),this,SLOT(onStatTimer()));
+    _statTimer->start(STAT_TIMER_INTERVAL*1000);
+    report("Stat timer started [Scan interval : " + QString::number(STAT_TIMER_INTERVAL)+
+                " seconds]",SYNCMAN,TEXT);
+}
 //-----------------------------------------------------------------------------------------------------------------------------------------
  void syncManager::onReportDirScanComplete()
  {
@@ -78,7 +76,6 @@ void syncManager::run()
   //-----------------------------------------------------------------------------------------------------------------------------------------
    void syncManager::processNextInMasterQueue()
    {
-       _mainQProcessing = true;
        if (_mainTransferQueue.size() == 0)
        {
            _mainQProcessing = false;
@@ -86,8 +83,11 @@ void syncManager::run()
        }
 
        auto dataPair =_mainTransferQueue.front();
-       if(_ftpAgents[0]->getClient())
-        _ftpAgents[0]->sendFile(dataPair);
+       if (_ftpAgents[0]->getClient() && _ftpAgents[0]->isConnected())
+       {
+           _mainQProcessing = true;
+            _ftpAgents[0]->sendFile(dataPair);
+       }
        return;
    }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -233,6 +233,11 @@ void syncManager::onNetworkConnEstablished()
 {
     report("Connected to network '" + _networkSession->configuration().name() +
            "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].",SYNCMAN, TEXT);
+
+    QString err = "";
+    _ftpAgents[0]->startDaemon(err);
+
+
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::initNetworkSession()
@@ -330,3 +335,9 @@ void syncManager::onStatTimer()
         _statViewCtrl->updateCellValue(1,1, QString::number(_retryTransferQueue.size()));
     }
 }
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onFtpClientConnected()
+{
+    createTimers();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------

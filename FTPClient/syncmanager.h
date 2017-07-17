@@ -15,6 +15,8 @@
 #include <QtNetwork/QNetworkSession>
 #include <queue>
 
+#define STAT_TIMER_INTERVAL 5
+
 class QFileInfo;
 typedef std::pair<QFileInfo*,int> PAIR_FI_I;
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -36,6 +38,7 @@ public:
     void onUploadStatusNotification(int pgbRow, int percentage);
     void onFileUploadStatus(PAIR_FI_I* fileinfo, bool status);
     void onFileUploadProgress(PAIR_FI_I* fileinfo, qint64 now, qint64 total);
+    void onFtpClientConnected();
 
 private:
     dirScanner* _directoryScanner       = nullptr;
@@ -44,6 +47,7 @@ private:
     QTableWidgetEx*  _statViewCtrl     = nullptr;
     QTimer*   _scanLoopTimer  = nullptr;
     QTimer*   _netConnTimer  = nullptr;
+    QTimer*   _ftpConnTimer  = nullptr;
     QTimer*   _statTimer = nullptr;
     fe_error*      _lastError = nullptr;
     bool _syncState = true;
@@ -52,6 +56,7 @@ private:
 
     void initNetworkSession();
     void processNextInMasterQueue();
+    void createTimers();
     ftpSenderDaemon** _ftpAgents;
     QNetworkSession* _networkSession    = nullptr;
     QNetworkConfigurationManager* _manager  = nullptr;

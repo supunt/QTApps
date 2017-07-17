@@ -38,22 +38,14 @@ void ftpSenderDaemon::init()
                             this, SLOT(onFtpStateChanged(int)));
      }
 
-    _ftp->connectToHost(_host, 21);
+    if (!isConnected())
+        _ftp->connectToHost(_host, 21);
+
     return;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::onFtpStateChanged(int state)
 {
-    switch(state)
-    {
-        case QFtp::Unconnected: qDebug() << "unconnected"; break;
-        case QFtp::HostLookup: qDebug() << "HostLookup"; break;
-        case QFtp::Connecting: qDebug() << "Connecting"; break;
-        case QFtp::Connected: qDebug() << "Connected"; break;
-        case QFtp::LoggedIn: qDebug() << "LoggedIn"; break;
-        case QFtp::Closing: qDebug() << "Closing"; break;
-    default : break;
-    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
@@ -108,11 +100,13 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
                                  " logged in to FTP service at " + MainWindow::getSetting("ftp_host")
                                  ,FTP,TEXT);
 
+            _connected = true;
             if (_reconnectTimer)
             {
                 delete _reconnectTimer;
                 _reconnectTimer = nullptr;
             }
+            _syncManager->onFtpClientConnected();
             return;
         }
     }
@@ -158,7 +152,6 @@ void ftpSenderDaemon::sendFile(PAIR_FI_I* fileInfo)
     }
     _ftp->put(_file,_currentFileInfo.first->fileName());
 }
-
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::onFtpDataTransferProgress(qint64 now,qint64 total)
 {

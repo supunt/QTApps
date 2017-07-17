@@ -1220,12 +1220,15 @@ void QFtpPI::dtpConnectState(int s)
 {
     switch (s) {
         case QFtpDTP::CsClosed:
-            if (waitForDtpToClose) {
+            if (waitForDtpToClose)
+            {
                 // there is an unprocessed reply
                 if (processReply())
                     replyText = QLatin1String("");
                 else
+                {
                     return;
+                }
             }
             waitForDtpToClose = false;
             readyRead();

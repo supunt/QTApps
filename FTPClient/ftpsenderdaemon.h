@@ -26,6 +26,8 @@ public:
     int getTID() {return _tid;};
     bool startDaemon(QString& err);
     QFtp* getClient(){return _ftp;};
+    bool isConnected() { return _connected;};
+    void setAsDisconnected() {_connected = false;};
 
 private:
     QThreadEx* _thread;
@@ -40,6 +42,7 @@ private:
     QString _pass;
     PAIR_FI_I _currentFileInfo;
     QTimer* _reconnectTimer = nullptr;
+    bool _connected = false;
 
 private slots:
     void init();

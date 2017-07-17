@@ -17,6 +17,7 @@ public:
     virtual void onUploadStatusNotification(int pgbRow, int percentage) = 0;
     virtual void onFileUploadStatus(PAIR_FI_I* fileinfo, bool status) = 0;
     virtual void onFileUploadProgress(PAIR_FI_I* fileinfo, qint64 now, qint64 total) = 0;
+    virtual void onFtpClientConnected() = 0;
 
 };
 
