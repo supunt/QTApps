@@ -24,7 +24,7 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
     _ftpAgents = new ftpSenderDaemon*[ftpThrCnt];
 
     for (int i = 0; i < ftpThrCnt; ++i)
-        _ftpAgents[i] = new ftpSenderDaemon(this,i,_networkSession);
+        _ftpAgents[i] = new ftpSenderDaemon(this,i);
 
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -76,6 +76,7 @@ void syncManager::createTimers()
   //-----------------------------------------------------------------------------------------------------------------------------------------
    void syncManager::processNextInMasterQueue()
    {
+       onStatTimer();
        if (_mainTransferQueue.size() == 0)
        {
            _mainQProcessing = false;
@@ -92,24 +93,18 @@ void syncManager::createTimers()
    }
 //-----------------------------------------------------------------------------------------------------------------------------------------
   void syncManager::onFileUploadStatus(PAIR_FI_I* fileinfo, bool status)
-  {
-      if (!_mainTransferQueue.empty())
-      {
-          auto dataPair =_mainTransferQueue.front();
-          _mainTransferQueue.pop();
-          delete dataPair;
-      }
+  {   
     QProgressBar* wi =(QProgressBar*)_mainViewCtrl->cellWidget(fileinfo->second,3);
     if (!status)
     {
-        wi->setValue(0);
-        PAIR_FI_I* fi = new PAIR_FI_I;
-        fi->first = fileinfo->first;
-        fi->second = fileinfo->second;
-        _retryTransferQueue.push(fi);
+
     }
     else
     {
+        auto dataPair =_mainTransferQueue.front();
+        _mainTransferQueue.pop();
+        delete dataPair;
+
         if (fileinfo->first->size() == 0)
         {
             wi->setMaximum(1);
@@ -122,6 +117,8 @@ void syncManager::createTimers()
         }
         processNextInMasterQueue();
     }
+
+    onStatTimer();
   }
   //-----------------------------------------------------------------------------------------------------------------------------------------
   void syncManager::onFileUploadProgress(PAIR_FI_I *fileinfo, qint64 now, qint64 total)
@@ -206,20 +203,7 @@ void syncManager::onScanTimerDurationChanged(int newDuration)
         connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
         _syncInterval = MainWindow::getSetting("sync_interval").toInt();
         _scanLoopTimer->start(_syncInterval*1000);
-
     }
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-void syncManager::onUploadStatusNotification(int pgbRow, int percentage)
-{
-
-}
-//-----------------------------------------------------------------------------------------------------------------------------------------
-void syncManager::onNetworkStateChanged(QNetworkSession::State state)
-{
-    /*logger::log("Connected to network changed %s [New state %s]",
-                    _networkSession->configuration().name(),
-                     getStateStr()); */
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkSessionError(QNetworkSession::SessionError error)
@@ -236,8 +220,8 @@ void syncManager::onNetworkConnEstablished()
 
     QString err = "";
     _ftpAgents[0]->startDaemon(err);
-
-
+    _isNetworkConnected = true;
+    onStatTimer();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::initNetworkSession()
@@ -283,8 +267,6 @@ void syncManager::initNetworkSession()
     connect(_networkSession,SIGNAL(opened()),this,SLOT(onNetworkConnEstablished()));
     connect(_networkSession, SIGNAL(error(QNetworkSession::SessionError)),
                 this, SLOT(onNetworkSessionError(QNetworkSession::SessionError)));
-    connect(_networkSession,SIGNAL(stateChanged(QNetworkSession::State)),
-                this,SLOT(onNetworkStateChanged(QNetworkSession::State)));
 
     _networkSession->open();
 }
@@ -305,39 +287,87 @@ void syncManager::onNetworkConfigChange(const QNetworkConfiguration &config)
             config.name() + ", Type : " +
            config.bearerTypeName() + ", state : " +
            stateStr + "]", NTWK, (stateStr == "Connected")?SUCCESS:ERROR);
+
+    if (QNetworkConfiguration::Active != config.state())
+    {
+        _mainQProcessing = false;
+        _isNetworkConnected = false;
+
+        if (_ftpAgents[0])
+            _ftpAgents[0]->setAsDisconnected();
+    }
+    onStatTimer();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onFtpInterrupted()
+{
+    _mainQProcessing = false;
+    onStatTimer();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onStatTimer()
 {
     int mainQsize =_mainTransferQueue.size();
-    int retryQsize =_retryTransferQueue.size();
     if (_statViewCtrl->rowCount() == 0)
     {
         _statViewCtrl->insertRow(0);
         QColor qc;
         qc.setRgb(255,255,255);
-        QString* mqs = new QString("Main Queue size");
+        QString* mqs = new QString("Transfer Queue size");
 
         _statViewCtrl->setCellData(0,0,mqs,&qc);
         _statViewCtrl->setCellData(0,1,&mainQsize, &qc);
 
         _statViewCtrl->insertRow(1);
-        QString* rqs = new QString("Retry Queue size");
-        _statViewCtrl->setCellData(1,0,rqs,&qc);
-        _statViewCtrl->setCellData(1,1,&retryQsize, &qc);
+        QString rcs = "Network Status";
+        QString netConn = _isNetworkConnected?"Connected":"Disconnected";
+        _statViewCtrl->setCellData(1,0,&rcs,&qc);
+
+        qc.setRgb(255,94,99);
+        if (netConn == "Connected")
+            qc.setRgb(111,255,111);
+
+        _statViewCtrl->setCellData(1,1,&netConn, &qc);
+
+        _statViewCtrl->insertRow(2);
+        QString fcs = "FTP Status";
+        qc.setRgb(255,255,255);
+        QString ftpConn = (_ftpAgents[0] &&  _ftpAgents[0]->isConnected()) ?"Connected":"Disconnected";
+        _statViewCtrl->setCellData(2,0,&fcs,&qc);
+
+        qc.setRgb(255,94,99);
+        if (ftpConn == "Connected")
+            qc.setRgb(111,255,111);
+
+        _statViewCtrl->setCellData(2,1,&ftpConn, &qc);
 
         _statViewCtrl->resizeRowsToContents();
         _statViewCtrl->resizeColumnsToContents();
     }
     else
     {
+        QColor qc;
+        qc.setRgb(255,94,99);
+
         _statViewCtrl->updateCellValue(0,1, QString::number(_mainTransferQueue.size()));
-        _statViewCtrl->updateCellValue(1,1, QString::number(_retryTransferQueue.size()));
+
+        if (_isNetworkConnected)
+            qc.setRgb(111,255,111);
+
+        _statViewCtrl->updateCellValue(1,1,  _isNetworkConnected?"Connected":"Disconnected",&qc);
+
+        QString ftpConn = (_ftpAgents[0] &&  _ftpAgents[0]->isConnected()) ?"Connected":"Disconnected";
+        qc.setRgb(255,94,99);
+        if (ftpConn == "Connected")
+            qc.setRgb(111,255,111);
+
+        _statViewCtrl->updateCellValue(2,1, ftpConn, &qc);
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onFtpClientConnected()
 {
     createTimers();
+    onStatTimer();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------

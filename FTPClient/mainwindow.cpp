@@ -188,7 +188,7 @@ void MainWindow::SaveSettings()
    void MainWindow::initStatTableHeaders()
    {
        QStringList titles;
-       titles << "Stat" << "Count" ;
+       titles << "Stat" << "Value" ;
        _statTableWidget->setColumnCount(2);
 
        _statTableWidget->setHorizontalHeaderLabels(titles);

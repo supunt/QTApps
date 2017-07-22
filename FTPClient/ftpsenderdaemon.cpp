@@ -5,7 +5,7 @@
 #include <QDebug>
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
-ftpSenderDaemon::ftpSenderDaemon(Abscallback* cb, int chThreadID,QNetworkSession* session)
+ftpSenderDaemon::ftpSenderDaemon(Abscallback* cb, int chThreadID)
 {
     _tid = chThreadID;
     _syncManager = (syncManager*)cb;
@@ -19,33 +19,43 @@ bool ftpSenderDaemon::startDaemon(QString& err)
     _user = MainWindow::getSetting("ftp_user");
     _pass = MainWindow::getSetting("ftp_pass");
 
-   // this->moveToThread(_thread);
-    //connect(_thread,SIGNAL(started()), this,SLOT(thread_start()));
-    //_thread->start();
     init();
     return true;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::init()
 {
-    if (!_ftp)
+    if (_ftp)
     {
-        _ftp = new QFtp(this);
-         connect(_ftp, SIGNAL(commandFinished(int,bool)), this, SLOT(ftpCommandFinished(int,bool)));
-         connect(_ftp, SIGNAL(dataTransferProgress(qint64,qint64)),
-                            this, SLOT(onFtpDataTransferProgress(qint64,qint64)));
-         connect(_ftp, SIGNAL(stateChanged(int)),
-                            this, SLOT(onFtpStateChanged(int)));
-     }
+        delete _ftp;
+        setAsDisconnected();
+   }
 
-    if (!isConnected())
-        _ftp->connectToHost(_host, 21);
+    _ftp = new QFtp(this);
+     connect(_ftp, SIGNAL(commandFinished(int,bool)), this, SLOT(ftpCommandFinished(int,bool)));
+     connect(_ftp, SIGNAL(dataTransferProgress(qint64,qint64)),
+                        this, SLOT(onFtpDataTransferProgress(qint64,qint64)));
+     connect(_ftp, SIGNAL(commandStarted(int)),
+                        this, SLOT(onFtpcommandStarted(int)));
+
+      _ftp->connectToHost(_host, 21);
 
     return;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void ftpSenderDaemon::onFtpStateChanged(int state)
+void ftpSenderDaemon::onFtpcommandStarted(int id)
 {
+    initCommandTimer();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void ftpSenderDaemon::initCommandTimer()
+{
+    if (_commandTimeoutTimer)
+        delete _commandTimeoutTimer;
+
+    _commandTimeoutTimer = new QTimer(this);
+    connect(_commandTimeoutTimer, SIGNAL(timeout()), this,SLOT(onCommandTimeoutTimer()));
+    _commandTimeoutTimer->start(FTP_COM_T_OUT_TIMER_INTERVAL);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
@@ -57,11 +67,16 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
             // TODO NOT THREAD SAFE
             _syncManager->report("Ftp host " + _host + " unreachable.",FTP,ERROR);
 
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
             if (!_reconnectTimer)
             {
                 _reconnectTimer = new QTimer;
                 connect(_reconnectTimer,SIGNAL(timeout()),this,SLOT(onReconnectTimer()));
-                _reconnectTimer->start(2000);
+                _reconnectTimer->start(FTP_RECONNECT_TIMER_INTERVAL);
             }
             return;
         }
@@ -71,6 +86,11 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
                                  " connected to FTP service at " + _host
                                  ,FTP,TEXT);
 
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
            if (_reconnectTimer)
            {
                delete _reconnectTimer;
@@ -86,11 +106,16 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
             // TODO NOT THREAD SAFE
             _syncManager->report("Ftp login failed. Please check login detains in settings window",FTP,ERROR);
 
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
             if (!_reconnectTimer)
             {
                 _reconnectTimer = new QTimer();
                 connect(_reconnectTimer,SIGNAL(timeout()),this,SLOT(onReconnectTimer()));
-                _reconnectTimer->start(2000);
+                _reconnectTimer->start(FTP_RECONNECT_TIMER_INTERVAL);
             }
             return;
         }
@@ -101,6 +126,12 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
                                  ,FTP,TEXT);
 
             _connected = true;
+
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
             if (_reconnectTimer)
             {
                 delete _reconnectTimer;
@@ -121,6 +152,12 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
             _file->close();
             _file = nullptr;
             _syncManager->onFileUploadStatus(&_currentFileInfo, !error);
+
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
             return;
         }
         else
@@ -131,6 +168,12 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
             _file->close();
             _file = nullptr;
             _syncManager->onFileUploadStatus(&_currentFileInfo, !error);
+
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
             return;
         }
     }
@@ -156,9 +199,28 @@ void ftpSenderDaemon::sendFile(PAIR_FI_I* fileInfo)
 void ftpSenderDaemon::onFtpDataTransferProgress(qint64 now,qint64 total)
 {
     _syncManager->onFileUploadProgress(&_currentFileInfo,now,total);
+    initCommandTimer();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::onReconnectTimer()
 {
+    init();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void ftpSenderDaemon::onCommandTimeoutTimer()
+{
+    delete _commandTimeoutTimer;
+    _commandTimeoutTimer = nullptr;
+
+    _syncManager->onFtpInterrupted();
+    if (_ftp->currentCommand() == QFtp::ConnectToHost)
+        _syncManager->report("FTP connect timed out. Issuing reconnect.",FTP,ERROR);
+    else if (_ftp->currentCommand() == QFtp::Login)
+        _syncManager->report("FTP login timed out. Issuing reconnect.",FTP,ERROR);
+    else
+    {
+        _syncManager->report("FTP transfer timed out. Issuing reconnect.",FTP,ERROR);
+    }
+
     init();
 }

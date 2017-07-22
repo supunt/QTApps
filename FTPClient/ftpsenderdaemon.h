@@ -11,6 +11,8 @@
 #include <QProgressBar>
 #include <QTimer>
 
+#define FTP_RECONNECT_TIMER_INTERVAL 2000
+#define FTP_COM_T_OUT_TIMER_INTERVAL 30000
 
 class syncManager;
 class QFileInfo;
@@ -20,7 +22,7 @@ class ftpSenderDaemon : public QObject
 {
     Q_OBJECT
 public:
-    explicit ftpSenderDaemon(Abscallback* cb, int chThreadID,QNetworkSession* session);
+    explicit ftpSenderDaemon(Abscallback* cb, int chThreadID);
     QThreadEx* getThread(){return _thread;};
     void sendFile(PAIR_FI_I* fileInfo);
     int getTID() {return _tid;};
@@ -42,14 +44,18 @@ private:
     QString _pass;
     PAIR_FI_I _currentFileInfo;
     QTimer* _reconnectTimer = nullptr;
+    QTimer* _commandTimeoutTimer = nullptr;
     bool _connected = false;
+
+    void initCommandTimer();
 
 private slots:
     void init();
     void ftpCommandFinished(int comId,bool error);
     void onFtpDataTransferProgress(qint64 now,qint64 total);
     void onReconnectTimer();
-    void onFtpStateChanged(int state);
+    void onCommandTimeoutTimer();
+    void onFtpcommandStarted(int id);
 };
 
 #endif // FTPSENDERDAEMON_H

@@ -25,7 +25,7 @@ public:
     QTableWidgetEx(QWidget *parent);
     void Insert_Row(QFileInfo* qfi, int& rownum);
     void Insert_Row(fe_error* err, int& rownum);
-    void updateCellValue(int row,int column, QString val);
+    void updateCellValue(int row,int column, QString val, QColor* cellColor = nullptr);
 
     template <typename T>
     void setCellData(int row,

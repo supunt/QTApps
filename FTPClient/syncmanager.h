@@ -35,10 +35,10 @@ public:
     void onReportDirScanComplete();
     void report(QString err, SOURCE source = DIR_SC, TWE type = TEXT);
     void onScanTimerDurationChanged(int newDuration);
-    void onUploadStatusNotification(int pgbRow, int percentage);
     void onFileUploadStatus(PAIR_FI_I* fileinfo, bool status);
     void onFileUploadProgress(PAIR_FI_I* fileinfo, qint64 now, qint64 total);
     void onFtpClientConnected();
+    void onFtpInterrupted();
 
 private:
     dirScanner* _directoryScanner       = nullptr;
@@ -53,6 +53,7 @@ private:
     bool _syncState = true;
     int  _syncInterval = 0;
     bool _mainQProcessing = false;
+    bool _isNetworkConnected = false;
 
     void initNetworkSession();
     void processNextInMasterQueue();
@@ -66,7 +67,6 @@ private:
 
 private slots:
     void onDiscScanTimer();
-    void onNetworkStateChanged(QNetworkSession::State state);
     void onNetworkSessionError(QNetworkSession::SessionError error);
     void onNetworkConnEstablished();
     void onNetworkReconnectTimer();

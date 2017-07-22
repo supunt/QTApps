@@ -60,12 +60,15 @@ void QTableWidgetEx::Insert_Row(fe_error* err, int& rownum)
     resizeColumnsToContents();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void QTableWidgetEx::updateCellValue(int row,int column, QString val)
+void QTableWidgetEx::updateCellValue(int row,int column, QString val, QColor* cellColor)
 {
     QTableWidgetItem* wi = item(row,column);
     if (wi)
     {
          wi->setText(val);
+
+         if (cellColor)
+            wi->setBackgroundColor(*cellColor);
          update();
     }
     resizeRowsToContents();
