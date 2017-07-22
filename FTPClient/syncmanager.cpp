@@ -34,10 +34,20 @@ void syncManager::run()
     connect(_manager,SIGNAL(configurationChanged(const QNetworkConfiguration &)),
             this,SLOT(onNetworkConfigChange(const QNetworkConfiguration &)));
 
+    createStatTimer();
     initNetworkSession();
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void syncManager::createTimers()
+void syncManager::createStatTimer()
+{
+    _statTimer = new QTimer;
+    connect(_statTimer,SIGNAL(timeout()),this,SLOT(onStatTimer()));
+    _statTimer->start(STAT_TIMER_INTERVAL*1000);
+    report("Stat timer started [Scan interval : " + QString::number(STAT_TIMER_INTERVAL)+
+                " seconds]",SYNCMAN,TEXT);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::createTransactionTimers()
 {
     _scanLoopTimer = new QTimer;
     connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
@@ -46,10 +56,10 @@ void syncManager::createTimers()
     report("Disk scan timer started [Scan interval : " + QString::number(_syncInterval) +
                 " seconds]",SYNCMAN,TEXT);
 
-    _statTimer = new QTimer;
-    connect(_statTimer,SIGNAL(timeout()),this,SLOT(onStatTimer()));
-    _statTimer->start(STAT_TIMER_INTERVAL*1000);
-    report("Stat timer started [Scan interval : " + QString::number(STAT_TIMER_INTERVAL)+
+    _txTimer= new QTimer;
+    connect(_txTimer,SIGNAL(timeout()),this,SLOT(onTransferTimer()));
+    _txTimer->start(TX_TIMER_INTERVAL*1000);
+    report("Transaction timer started [Scan interval : " + QString::number(TX_TIMER_INTERVAL)+
                 " seconds]",SYNCMAN,TEXT);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -69,10 +79,14 @@ void syncManager::createTimers()
          }
          newFiles->clear();
 
-         if (!_mainQProcessing)
-            processNextInMasterQueue();
- }
 
+ }
+ //-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onTransferTimer()
+{
+    if (!_mainQProcessing)
+       processNextInMasterQueue();
+}
   //-----------------------------------------------------------------------------------------------------------------------------------------
    void syncManager::processNextInMasterQueue()
    {
@@ -101,6 +115,7 @@ void syncManager::createTimers()
     }
     else
     {
+        _filesTransferred++;
         auto dataPair =_mainTransferQueue.front();
         _mainTransferQueue.pop();
         delete dataPair;
@@ -312,23 +327,21 @@ void syncManager::onStatTimer()
     {
         _statViewCtrl->insertRow(0);
         QColor qc;
-        qc.setRgb(255,255,255);
         QString* mqs = new QString("Transfer Queue size");
 
-        _statViewCtrl->setCellData(0,0,mqs,&qc);
-        _statViewCtrl->setCellData(0,1,&mainQsize, &qc);
-
+        _statViewCtrl->setCellData(0,0,mqs);
+        _statViewCtrl->setCellData(0,1,&mainQsize);
+         //---------------------------------------------------------------------------------------------------------------------------
         _statViewCtrl->insertRow(1);
         QString rcs = "Network Status";
         QString netConn = _isNetworkConnected?"Connected":"Disconnected";
-        _statViewCtrl->setCellData(1,0,&rcs,&qc);
+        _statViewCtrl->setCellData(1,0,&rcs);
 
         qc.setRgb(255,94,99);
         if (netConn == "Connected")
             qc.setRgb(111,255,111);
-
         _statViewCtrl->setCellData(1,1,&netConn, &qc);
-
+        //---------------------------------------------------------------------------------------------------------------------------
         _statViewCtrl->insertRow(2);
         QString fcs = "FTP Status";
         qc.setRgb(255,255,255);
@@ -340,7 +353,13 @@ void syncManager::onStatTimer()
             qc.setRgb(111,255,111);
 
         _statViewCtrl->setCellData(2,1,&ftpConn, &qc);
+         //---------------------------------------------------------------------------------------------------------------------------
+        _statViewCtrl->insertRow(3);
+        QString count = "Files transferred";
 
+        _statViewCtrl->setCellData(3,0,&count);
+        _statViewCtrl->setCellData(3,1,&_filesTransferred);
+        //---------------------------------------------------------------------------------------------------------------------------
         _statViewCtrl->resizeRowsToContents();
         _statViewCtrl->resizeColumnsToContents();
     }
@@ -362,12 +381,13 @@ void syncManager::onStatTimer()
             qc.setRgb(111,255,111);
 
         _statViewCtrl->updateCellValue(2,1, ftpConn, &qc);
+        _statViewCtrl->updateCellValue(3,1, QString::number(_filesTransferred));
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onFtpClientConnected()
 {
-    createTimers();
+    createTransactionTimers();
     onStatTimer();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------

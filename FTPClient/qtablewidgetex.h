@@ -19,19 +19,32 @@ struct fe_error
     int _index;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------
+template <class T>
+struct statobject
+{
+    QString _statId = "";
+    T _data;     //QString,int,double
+    int _statPos = 0;
+    QColor _dataCellColor;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------
 class QTableWidgetEx : public QTableWidget
 {
 public:
     QTableWidgetEx(QWidget *parent);
     void Insert_Row(QFileInfo* qfi, int& rownum);
     void Insert_Row(fe_error* err, int& rownum);
-    void updateCellValue(int row,int column, QString val, QColor* cellColor = nullptr);
+    template <typename T>
+    void Insert_Row(statobject<T>* stat, int& rownum);
+
+    void updateCellValue(int row, int column, QString val, QColor* cellColor = nullptr);
 
     template <typename T>
     void setCellData(int row,
                             int column,
                              T* data,
-                            QColor* cellColor = nullptr);
+                            QColor* rowColor = nullptr);
+
 private:
     //---------- general hash codes we are going to use
     size_t const _dt_int_hash = typeid(int).hash_code();

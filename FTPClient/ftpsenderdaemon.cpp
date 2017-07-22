@@ -50,12 +50,20 @@ void ftpSenderDaemon::onFtpcommandStarted(int id)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::initCommandTimer()
 {
+    int timeOut= FTP_COM_T_OUT_TIMER_INTERVAL;
+    switch (_ftp->currentCommand())
+    {
+        case QFtp::Login: timeOut = 10000; break;
+        case QFtp::ConnectToHost: timeOut = 20000; break;
+        default: timeOut = 5000; break;
+    }
+
     if (_commandTimeoutTimer)
         delete _commandTimeoutTimer;
 
     _commandTimeoutTimer = new QTimer(this);
     connect(_commandTimeoutTimer, SIGNAL(timeout()), this,SLOT(onCommandTimeoutTimer()));
-    _commandTimeoutTimer->start(FTP_COM_T_OUT_TIMER_INTERVAL);
+    _commandTimeoutTimer->start(timeOut);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)

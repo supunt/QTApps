@@ -16,6 +16,7 @@
 #include <queue>
 
 #define STAT_TIMER_INTERVAL 5
+#define TX_TIMER_INTERVAL 30
 
 class QFileInfo;
 typedef std::pair<QFileInfo*,int> PAIR_FI_I;
@@ -49,15 +50,18 @@ private:
     QTimer*   _netConnTimer  = nullptr;
     QTimer*   _ftpConnTimer  = nullptr;
     QTimer*   _statTimer = nullptr;
+    QTimer*   _txTimer  = nullptr;
     fe_error*      _lastError = nullptr;
     bool _syncState = true;
     int  _syncInterval = 0;
     bool _mainQProcessing = false;
     bool _isNetworkConnected = false;
+    int _filesTransferred = 0;
 
     void initNetworkSession();
     void processNextInMasterQueue();
-    void createTimers();
+    void createTransactionTimers();
+    void createStatTimer();
     ftpSenderDaemon** _ftpAgents;
     QNetworkSession* _networkSession    = nullptr;
     QNetworkConfigurationManager* _manager  = nullptr;
@@ -72,6 +76,7 @@ private slots:
     void onNetworkReconnectTimer();
     void onNetworkConfigChange(const QNetworkConfiguration & config);
     void onStatTimer();
+    void onTransferTimer();
 };
 
 #endif // SYNCMANAGER_H
