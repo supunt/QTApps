@@ -93,7 +93,7 @@
     <item row="0" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Sync interval (sec)</string>
+       <string>Folder Scan interval (sec)</string>
       </property>
      </widget>
     </item>
@@ -133,13 +133,6 @@
         </property>
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="btn_testSettings">
-        <property name="text">
-         <string>Test Settings</string>
         </property>
        </widget>
       </item>
@@ -188,7 +181,6 @@
   <tabstop>ftp_host</tabstop>
   <tabstop>ftp_user</tabstop>
   <tabstop>ftp_pass</tabstop>
-  <tabstop>btn_testSettings</tabstop>
   <tabstop>thread_count</tabstop>
   <tabstop>log_path</tabstop>
   <tabstop>btn_setLogPath</tabstop>
@@ -208,22 +200,6 @@
     <hint type="destinationlabel">
      <x>454</x>
      <y>277</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>btn_testSettings</sender>
-   <signal>clicked()</signal>
-   <receiver>settingsDlg</receiver>
-   <slot>checkSettings()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>508</x>
-     <y>139</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>345</x>
-     <y>278</y>
     </hint>
    </hints>
   </connection>

@@ -86,6 +86,8 @@ void syncManager::createTransactionTimers()
  //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onTransferTimer()
 {
+    // Once main queue starts procesing, files are pulled once FTP is done with one.
+    logger::log("On Transfer Timer");
     if (!_mainQProcessing)
        processNextInMasterQueue();
 }
@@ -93,7 +95,7 @@ void syncManager::onTransferTimer()
    void syncManager::processNextInMasterQueue()
    {
        onStatTimer();
-       if (_mainTransferQueue.size() == 0)
+       if (_mainTransferQueue.size() == 0 || !getSyncState())
        {
            _mainQProcessing = false;
             return;
@@ -215,7 +217,7 @@ void syncManager::onScanTimerDurationChanged(int newDuration)
         if (_scanLoopTimer)
             delete _scanLoopTimer;
 
-        report("Sync interval changed from " + QString::number(_syncInterval) +
+        report("Folder scan interval changed from " + QString::number(_syncInterval) +
                " seconds to " + QString::number(newDuration) + " seconds.", SYNCMAN, WARNING);
 
         _scanLoopTimer = new QTimer;
