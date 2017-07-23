@@ -1,6 +1,7 @@
 #include "qtablewidgetex.h"
 #include "QDateTime"
 #include "mainwindow.h"
+#include "logger/logger.h"
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 QTableWidgetEx::QTableWidgetEx(QWidget *parent):QTableWidget(parent)
@@ -60,15 +61,46 @@ void QTableWidgetEx::Insert_Row(fe_error* err, int& rownum)
     resizeColumnsToContents();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void QTableWidgetEx::updateCellValue(int row,int column, QString val, QColor* cellColor)
+void QTableWidgetEx::Insert_Row(statobject *stat)
 {
-    QTableWidgetItem* wi = item(row,column);
+    if (!stat)
+        return;
+
+    int rownum = rowCount();
+    insertRow(rownum);
+
+    setCellData(rownum,0,&stat->_statId);
+    if (stat->_dataTypeHash == _dt_int_hash)
+        setCellData(rownum,1,((int*)stat->_data), &stat->_dataCellColor);
+    else if (stat->_dataTypeHash == _dt_double_hash)
+        setCellData(rownum,1,((double*)stat->_data), &stat->_dataCellColor);
+    else if (stat->_dataTypeHash == _dt_qstring_hash)
+        setCellData(rownum,1,((QString*)stat->_data), &stat->_dataCellColor);
+
+    resizeRowsToContents();
+    resizeColumnsToContents();
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void QTableWidgetEx::updateCellValue(cellData* cellData)
+{
+    QTableWidgetItem* wi = item(cellData->_row, cellData->_column);
     if (wi)
     {
-         wi->setText(val);
+        if (cellData->_dataTypeHash == _dt_int_hash)
+            wi->setText(QString::number(*((int*)cellData->_data)));
+        else if (cellData->_dataTypeHash == _dt_double_hash)
+            wi->setText(QString::number(*((double*)cellData->_data)));
+        else if (cellData->_dataTypeHash == _dt_qstring_hash)
+            wi->setText(*((QString*)cellData->_data));
+        else if (cellData->_dataTypeHash == _dt_qdatetime_hash)
+            wi->setText(((QDateTime*)cellData->_data)->toString());
+        else
+        {
+            logger::logError("Unsupported data type injected.");
+        }
 
-         if (cellColor)
-            wi->setBackgroundColor(*cellColor);
+         if (cellData->_dataCellColor)
+            wi->setBackgroundColor(*cellData->_dataCellColor);
          update();
     }
     resizeRowsToContents();
@@ -98,12 +130,11 @@ void QTableWidgetEx::setCellData(int row, int column, T* data, QColor* cellColor
     }
      else
      {
+         logger::logError("Unsupported data type injected.");
          return;
     }
      if (cellColor)
         twi->setBackgroundColor(*cellColor);
 
-     if (!twi)
-         qDebug() << "NULL";
      setItem(row,column,twi);
 }

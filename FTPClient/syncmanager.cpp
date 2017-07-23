@@ -26,6 +26,8 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
     for (int i = 0; i < ftpThrCnt; ++i)
         _ftpAgents[i] = new ftpSenderDaemon(this,i);
 
+    _cellData = new cellData;
+    _cellData->setup(-1,-1,typeid(int).hash_code(),nullptr);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::run()
@@ -170,8 +172,10 @@ void syncManager::onTransferTimer()
      fe_error* er = nullptr;
      if (_lastError && _lastError->_err == err)
      {
-            _errorViewCtrl->updateCellValue(_lastError->_index,3,QString::number(++_lastError->_count));
-            return;
+         int val = ++_lastError->_count;
+          _cellData->setup(_lastError->_index,3,typeid(int).hash_code(), &val);
+        _errorViewCtrl->updateCellValue(_cellData);
+        return;
      }
      else
      {
@@ -261,7 +265,7 @@ void syncManager::initNetworkSession()
                // get rid of VMWare adapters
                if (QNetworkConfiguration::BearerUnknown == cfg.bearerType())
                    continue;
-               // TODO -  connecting to very first adaptor
+               // connecting to very first adaptor
                ntwkConfig = cfg;
                break;
            }
@@ -322,66 +326,42 @@ void syncManager::onFtpInterrupted()
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onStatTimer()
 {
-    int mainQsize =_mainTransferQueue.size();
     if (_statViewCtrl->rowCount() == 0)
-    {
-        _statViewCtrl->insertRow(0);
-        QColor qc;
-        QString* mqs = new QString("Transfer Queue size");
-
-        _statViewCtrl->setCellData(0,0,mqs);
-        _statViewCtrl->setCellData(0,1,&mainQsize);
-         //---------------------------------------------------------------------------------------------------------------------------
-        _statViewCtrl->insertRow(1);
-        QString rcs = "Network Status";
-        QString netConn = _isNetworkConnected?"Connected":"Disconnected";
-        _statViewCtrl->setCellData(1,0,&rcs);
-
-        qc.setRgb(255,94,99);
-        if (netConn == "Connected")
-            qc.setRgb(111,255,111);
-        _statViewCtrl->setCellData(1,1,&netConn, &qc);
-        //---------------------------------------------------------------------------------------------------------------------------
-        _statViewCtrl->insertRow(2);
-        QString fcs = "FTP Status";
-        qc.setRgb(255,255,255);
-        QString ftpConn = (_ftpAgents[0] &&  _ftpAgents[0]->isConnected()) ?"Connected":"Disconnected";
-        _statViewCtrl->setCellData(2,0,&fcs,&qc);
-
-        qc.setRgb(255,94,99);
-        if (ftpConn == "Connected")
-            qc.setRgb(111,255,111);
-
-        _statViewCtrl->setCellData(2,1,&ftpConn, &qc);
-         //---------------------------------------------------------------------------------------------------------------------------
-        _statViewCtrl->insertRow(3);
-        QString count = "Files transferred";
-
-        _statViewCtrl->setCellData(3,0,&count);
-        _statViewCtrl->setCellData(3,1,&_filesTransferred);
-        //---------------------------------------------------------------------------------------------------------------------------
-        _statViewCtrl->resizeRowsToContents();
-        _statViewCtrl->resizeColumnsToContents();
-    }
+       initStatTable();
     else
     {
         QColor qc;
+        //-----------------------------------------------------------------------------------------------------------------------------------
         qc.setRgb(255,94,99);
-
-        _statViewCtrl->updateCellValue(0,1, QString::number(_mainTransferQueue.size()));
-
         if (_isNetworkConnected)
             qc.setRgb(111,255,111);
 
-        _statViewCtrl->updateCellValue(1,1,  _isNetworkConnected?"Connected":"Disconnected",&qc);
-
-        QString ftpConn = (_ftpAgents[0] &&  _ftpAgents[0]->isConnected()) ?"Connected":"Disconnected";
+         QString conn = _isNetworkConnected ?"Connected":"Disconnected";
+        _cellData->setup(0,1,typeid(QString).hash_code(),
+                        &conn, &qc);
+        _statViewCtrl->updateCellValue(_cellData);
+        //-----------------------------------------------------------------------------------------------------------------------------------
+        conn = (_ftpAgents[0] &&  _ftpAgents[0]->isConnected()) ?"Connected":"Disconnected";
         qc.setRgb(255,94,99);
-        if (ftpConn == "Connected")
+        if (conn == "Connected")
             qc.setRgb(111,255,111);
 
-        _statViewCtrl->updateCellValue(2,1, ftpConn, &qc);
-        _statViewCtrl->updateCellValue(3,1, QString::number(_filesTransferred));
+        _cellData->setup(1,1,typeid(QString).hash_code(),
+                         &conn, &qc);
+
+        _statViewCtrl->updateCellValue(_cellData);
+        //-----------------------------------------------------------------------------------------------------------------------------------
+        int mainQsize =_mainTransferQueue.size();
+        _cellData->setup(2,1,typeid(int).hash_code(),
+                         &mainQsize);
+
+        _statViewCtrl->updateCellValue(_cellData);
+        //-----------------------------------------------------------------------------------------------------------------------------------
+        _cellData->setup(3,1,typeid(int).hash_code(),
+                         &_filesTransferred);
+
+        _statViewCtrl->updateCellValue(_cellData);
+        //-----------------------------------------------------------------------------------------------------------------------------------
     }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -391,3 +371,42 @@ void syncManager::onFtpClientConnected()
     onStatTimer();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::initStatTable()
+{
+    QColor qc;
+    //---------------------------------------------------------------------------------------------------------
+    void* data =  new QString(_isNetworkConnected?"Connected":"Disconnected");
+
+    if (_isNetworkConnected)
+        qc.setRgb(111,255,111);
+    else
+        qc.setRgb(255,94,99);
+
+    statobject* statObj = new statobject("Network", typeid(QString).hash_code(),
+                                        data, &qc);
+
+    _statViewCtrl->Insert_Row(statObj);
+    //---------------------------------------------------------------------------------------------------------
+    bool status = (_ftpAgents[0] &&  _ftpAgents[0]->isConnected());
+    data =  new QString(status ?"Connected":"Disconnected");
+
+    if (status)
+        qc.setRgb(111,255,111);
+    else
+        qc.setRgb(255,94,99);
+
+    statObj = new statobject("FTP", typeid(QString).hash_code(),
+                                        data, &qc);
+    _statViewCtrl->Insert_Row(statObj);
+    //---------------------------------------------------------------------------------------------------------
+    data = new int(_mainTransferQueue.size());
+    statObj = new statobject("Transfer Queue size", typeid(int).hash_code(),
+                                         data);
+    _statViewCtrl->Insert_Row(statObj);
+    //---------------------------------------------------------------------------------------------------------
+    data = new int(_filesTransferred);
+    statObj = new statobject("Files transferred", typeid(int).hash_code(),
+                                         data);
+
+    _statViewCtrl->Insert_Row(statObj);
+}

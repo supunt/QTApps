@@ -3,6 +3,7 @@
 #pragma once
 
 #include "QTableWidget.h"
+#include <QColor>
 #include "QDebug"
 #include "QFileInfo"
 #include "QDateTime"
@@ -19,13 +20,46 @@ struct fe_error
     int _index;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------
-template <class T>
+struct cellData
+{
+    void setup(int row, int col, size_t dataType, void* data, QColor* qc = nullptr)
+    {
+        _row = row;
+        _column = col;
+        _dataTypeHash = dataType;
+        _data = data;
+        _dataCellColor = qc;
+    }
+
+    int _row = -1;
+    int _column = -1;
+    size_t _dataTypeHash = typeid(int).hash_code();
+    void* _data = nullptr;
+    QColor* _dataCellColor ;
+};
+//-----------------------------------------------------------------------------------------------------------------------------------------
 struct statobject
 {
+    statobject(QString name, size_t dtHash, void* data, QColor* qc = nullptr)
+    {
+        _statId = name;
+        _dataTypeHash = dtHash;
+        _data = data;
+
+        if (!qc)
+            _dataCellColor.setRgb(255,255,255);
+        else
+        {
+            int r = 255, g = 255, b = 255;
+            qc->getRgb(&r,&g,&b);
+            _dataCellColor.setRgb(r,g,b);
+        }
+    }
+
     QString _statId = "";
-    T _data;     //QString,int,double
-    int _statPos = 0;
-    QColor _dataCellColor;
+    size_t _dataTypeHash = typeid(int).hash_code();
+    void* _data = nullptr;
+    QColor _dataCellColor ;
 };
 //-----------------------------------------------------------------------------------------------------------------------------------------
 class QTableWidgetEx : public QTableWidget
@@ -34,10 +68,9 @@ public:
     QTableWidgetEx(QWidget *parent);
     void Insert_Row(QFileInfo* qfi, int& rownum);
     void Insert_Row(fe_error* err, int& rownum);
-    template <typename T>
-    void Insert_Row(statobject<T>* stat, int& rownum);
+    void Insert_Row(statobject* stat);
 
-    void updateCellValue(int row, int column, QString val, QColor* cellColor = nullptr);
+    void updateCellValue(cellData* cellData);
 
     template <typename T>
     void setCellData(int row,

@@ -57,6 +57,7 @@ private:
     bool _mainQProcessing = false;
     bool _isNetworkConnected = false;
     int _filesTransferred = 0;
+    cellData* _cellData = nullptr;
 
     void initNetworkSession();
     void processNextInMasterQueue();
@@ -68,6 +69,9 @@ private:
 
     std::queue<PAIR_FI_I*> _mainTransferQueue;
     std::queue<PAIR_FI_I*> _retryTransferQueue;
+
+    std::vector<statobject*> _statVector;
+    void initStatTable();
 
 private slots:
     void onDiscScanTimer();
