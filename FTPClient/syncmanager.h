@@ -28,11 +28,11 @@ public:
     syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewCtrl,
                 QTableWidgetEx* startViewCtrl);
 
+    //-----------------------------------------------------
     void setSyncState(bool state) {_syncState = state;};
     bool getSyncState() {return _syncState;};
     void run();
-
-    //---------------- AbsCB
+    //---------------- AbsCB ------------------
     void onReportDirScanComplete();
     void report(QString err, SOURCE source = DIR_SC, TWE type = TEXT);
     void onScanTimerDurationChanged(int newDuration);
@@ -40,37 +40,44 @@ public:
     void onFileUploadProgress(PAIR_FI_I* fileinfo, qint64 now, qint64 total);
     void onFtpClientConnected();
     void onFtpInterrupted();
+    void onHKTimerDurationChanged(QTime time) {};
 
 private:
+    //-----------------------------------------------------
     dirScanner* _directoryScanner       = nullptr;
     QTableWidgetEx* _mainViewCtrl    = nullptr;
     QTableWidgetEx*  _errorViewCtrl     = nullptr;
     QTableWidgetEx*  _statViewCtrl     = nullptr;
+    //-----------------------------------------------------
     QTimer*   _scanLoopTimer  = nullptr;
     QTimer*   _netConnTimer  = nullptr;
     QTimer*   _ftpConnTimer  = nullptr;
     QTimer*   _statTimer = nullptr;
     QTimer*   _txTimer  = nullptr;
+    QTimer*   _houseKeepingTimer  = nullptr;
+    //-----------------------------------------------------
     fe_error*      _lastError = nullptr;
-    bool _syncState = true;
-    int  _syncInterval = 0;
-    bool _mainQProcessing = false;
-    bool _isNetworkConnected = false;
-    int _filesTransferred = 0;
     cellData* _cellData = nullptr;
 
-    void initNetworkSession();
-    void processNextInMasterQueue();
-    void createTransactionTimers();
-    void createStatTimer();
     ftpSenderDaemon** _ftpAgents;
     QNetworkSession* _networkSession    = nullptr;
     QNetworkConfigurationManager* _manager  = nullptr;
 
     std::queue<PAIR_FI_I*> _mainTransferQueue;
     std::queue<PAIR_FI_I*> _retryTransferQueue;
+    //-----------------------------------------------------
+    bool _syncState = true;
+    bool _mainQProcessing = false;
+    bool _isNetworkConnected = false;
+    bool _isHousekeeping = false;
 
-    std::vector<statobject*> _statVector;
+    int _filesTransferred = 0;
+    int  _syncInterval = 0;
+    //-----------------------------------------------------
+    void initNetworkSession();
+    void processNextInMasterQueue();
+    void createTransactionTimers();
+    void createStatTimer();
     void initStatTable();
 
 private slots:

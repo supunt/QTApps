@@ -65,6 +65,7 @@ void settingsDlg::saveSettings()
 void settingsDlg::doPostChangeSettingValidations()
 {
     _syncManager->onScanTimerDurationChanged(ui->sync_interval->text().toInt());
+    _syncManager->onHKTimerDurationChanged(ui->house_keeping->time());
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::checkSettings()
