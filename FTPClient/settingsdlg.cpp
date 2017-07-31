@@ -1,6 +1,7 @@
 #include "defs.h"
 #include "settingsdlg.h"
 #include "ui_settingsdlg.h"
+#include "logger/logger.h"
 
 #include <QDebug>
 #include <QList>
@@ -43,6 +44,7 @@ void settingsDlg::LoadSettings()
         }
         child->setText(temp);
         MainWindow::_mapSettings[child->objectName()] = temp;
+        qDebug() << "Loaded Setting : " + child->objectName() + " : " + temp;
     }
     _generalSettings->endGroup();
 }
@@ -88,10 +90,27 @@ void settingsDlg::setLogPath()
      ui->log_path->setText(newPath);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
+void settingsDlg::setBkupPath()
+{
+    QString oldPath = ui->bkup_path->text();
+    QString newPath = "";
+    newPath = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
+                                                   oldPath,
+                                                    QFileDialog::ShowDirsOnly
+                                                    | QFileDialog::DontResolveSymlinks);
+
+    // User cancelled
+    if (newPath == "")
+        newPath = oldPath;
+
+     ui->bkup_path->setText(newPath);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::InitDefaultSettings()
 {
     _defaultSettings[ui->sync_interval->objectName()] = QString::number(DEFAULT_SCAN_TIMER_INTERVAL);
-    _defaultSettings[ui->log_path->objectName()] = QDir::tempPath() +"\\Peercore\\FTPClient";
+    _defaultSettings[ui->log_path->objectName()] = QDir::tempPath() +"/Peercore/FTPClient";
+    _defaultSettings[ui->bkup_path->objectName()] = QDir::tempPath() +"/Peercore/FTPClient/daily_backup";
     _defaultSettings[ui->thread_count->objectName()] = QString::number(FTP_DEF_THREAD_COUNT);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------

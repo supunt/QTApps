@@ -36,21 +36,45 @@ void syncManager::run()
     connect(_manager,SIGNAL(configurationChanged(const QNetworkConfiguration &)),
             this,SLOT(onNetworkConfigChange(const QNetworkConfiguration &)));
 
-    createStatTimer();
+    createHKAndStatTimer();
     initNetworkSession();
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
-void syncManager::createStatTimer()
+void syncManager::createHKAndStatTimer()
 {
     _statTimer = new QTimer;
     connect(_statTimer,SIGNAL(timeout()),this,SLOT(onStatTimer()));
     _statTimer->start(STAT_TIMER_INTERVAL*1000);
     report("Stat timer started [Scan interval : " + QString::number(STAT_TIMER_INTERVAL)+
                 " seconds]",SYNCMAN,TEXT);
+
+    _houseKeepingTimer = new QTimer;
+    QTime hkTime = QTime::fromString(MainWindow::getSetting("qt_spinbox_lineedit"), "h:mm AP");
+    QTime curTime = QTime::currentTime();
+
+    int houseKeepingAlarmDuration = curTime.msecsTo(hkTime);
+
+    if (houseKeepingAlarmDuration < 0)
+    {
+        _isHousekeeping = true;
+        report("Application started after housekeeping time.",SYNCMAN,WARNING);
+        return;
+    }
+
+    connect(_houseKeepingTimer,SIGNAL(timeout()),this,SLOT(onHouseKeepingTimer()));
+    _houseKeepingTimer->start(houseKeepingAlarmDuration);
+    report("Housekeeping timer started [Triggers at : " + hkTime.toString("h:mm AP")+
+                "]",SYNCMAN,TEXT);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::createTransactionTimers()
 {
+    if (_isHousekeeping)
+    {
+        report("Transaction timers will not be created as the tool started after Housekeeping time.",
+                SYNCMAN,WARNING);
+        return;
+    }
     _scanLoopTimer = new QTimer;
     connect(_scanLoopTimer,SIGNAL(timeout()),this,SLOT(onDiscScanTimer()));
     _syncInterval = MainWindow::getSetting("sync_interval").toInt();
@@ -80,8 +104,6 @@ void syncManager::createTransactionTimers()
              _mainTransferQueue.push(new PAIR_FI_I(file,num));
          }
          newFiles->clear();
-
-
  }
  //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onTransferTimer()
@@ -199,15 +221,30 @@ void syncManager::onTransferTimer()
 //-----------------------------------------------------------------------------------------------------------------------------------------
  void syncManager::onDiscScanTimer()
  {
-     if (!getSyncState())
+     if (!getSyncState() || !_networkSession || !_networkSession->isOpen())
+     {
+         if (_isHousekeeping)
+         {
+            delete _scanLoopTimer;
+            _scanLoopTimer = nullptr;
+             report("Termination directory scan timer. Entering Housekeeping. Files added after this will not be transferred.",
+                    SYNCMAN,WARNING);
+         }
          return;
-
-     if (!_networkSession || !_networkSession->isOpen())
-         return;
+    }
 
      QString err = "";
     if (!_directoryScanner->OnSyncTimer(err))
         report(err,DIR_SC,ERROR);
+
+    // This is to favour '_scanLoopTimer' timer in the race between housekeeping timer and _scanLoopTimer timer.
+    if (_isHousekeeping)
+    {
+       delete _scanLoopTimer;
+       _scanLoopTimer = nullptr;
+        report("Termination directory scan timer. Entering Housekeeping. Files added after this will not be transferred.",
+               SYNCMAN,WARNING);
+    }
  }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onScanTimerDurationChanged(int newDuration)
@@ -411,4 +448,98 @@ void syncManager::initStatTable()
                                          data);
 
     _statViewCtrl->Insert_Row(statObj);
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::onHouseKeepingTimer()
+{
+    _isHousekeeping = true;
+    if (_mainTransferQueue.empty())
+    {
+        // kill all timers
+        delete _scanLoopTimer;   _scanLoopTimer = nullptr;
+        delete _netConnTimer;  _netConnTimer = nullptr;
+        delete _ftpConnTimer; _ftpConnTimer  = nullptr;
+        delete _statTimer; _statTimer = nullptr;
+        delete _txTimer; _txTimer  = nullptr;
+        delete _houseKeepingTimer; _houseKeepingTimer  = nullptr;
+
+        report("All timers terminated. System entered housekeeping.",SYNCMAN,WARNING);
+
+        // Backup files.
+        runDirBackup();
+        GenerateReport();
+        return;
+     }
+    else
+    {
+         report("Housekeeping on pause. Waiting for queued transfers to complete.",SYNCMAN,WARNING);
+        if (_houseKeepingTimer->interval() != STAT_TIMER_INTERVAL)
+        {
+            delete _houseKeepingTimer;
+            _houseKeepingTimer = new QTimer(this);
+            connect(_houseKeepingTimer,SIGNAL(timeout()),this,SLOT(onHouseKeepingTimer()));
+            _houseKeepingTimer->start(STAT_TIMER_INTERVAL*1000);
+            return;
+        }
+    }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::runDirBackup()
+{
+    QDir bkupPath;
+    QDate qd = QDate::currentDate();
+    QString path = MainWindow::getSetting("bkup_path");
+    QString datedDir = "sync_dir_backup"+ qd.toString("_dd_MM_yyyy") + "/";
+    bkupPath.setPath(path);
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    if (!bkupPath.exists(path))
+    {
+        if (!bkupPath.mkpath(path));
+        {
+            report("Backup path could not be created. Contact administrator. [Path : " + path + "]."
+                   , SYNCMAN, ERROR);
+            return;
+        }
+    }
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    if (!bkupPath.exists(path+"/"+ datedDir))
+    {
+        if (!bkupPath.mkdir(datedDir))
+        {
+            report("Backup directory could not be created. Contact administrator. [Path : " + path + "/"
+                    + datedDir + "].",
+                   SYNCMAN, ERROR);
+            return;
+        }
+    }
+    bkupPath.setPath(path + "/"+ datedDir);
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    report("Backup path created [Path : " + bkupPath.path() + "].",
+           SYNCMAN, TEXT);
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    report("Backing up files in sync folder paths.", SYNCMAN, TEXT);
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    int files = _mainViewCtrl->rowCount();
+    for (int i=0; i < files; ++i)
+    {
+       QString pathCellValue = _mainViewCtrl->item(i,5)->text();
+       QString fileCellValue = _mainViewCtrl->item(i,4)->text();
+        //-----------------------------------------------------------------------------------------------------------------------------------
+       if (!bkupPath.exists(pathCellValue + "/"+ fileCellValue))
+       {
+            if (!QFile::copy((pathCellValue + "/"+ fileCellValue), (bkupPath.path() + "/" + fileCellValue)))
+            {
+               report("Backing up failed for file '" + pathCellValue + "/" +fileCellValue + "'", SYNCMAN, ERROR);
+            }
+            else
+            {
+                QFile::remove(pathCellValue+"/"+fileCellValue);
+            }
+       }
+       else
+       {
+           QFile::remove(pathCellValue+"/"+fileCellValue);
+       }
+        //-----------------------------------------------------------------------------------------------------------------------------------
+    }
 }

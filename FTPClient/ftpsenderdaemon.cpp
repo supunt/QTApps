@@ -55,7 +55,7 @@ void ftpSenderDaemon::initCommandTimer()
     {
         case QFtp::Login: timeOut = 10000; break;
         case QFtp::ConnectToHost: timeOut = 20000; break;
-        default: timeOut = 5000; break;
+        default: timeOut = 10000; break;
     }
 
     if (_commandTimeoutTimer)
@@ -104,7 +104,11 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
                delete _reconnectTimer;
                _reconnectTimer = nullptr;
            }
-            _ftp->login(_user,_pass);
+
+           if (_user.trimmed() == "")
+               _ftp->login();
+           else
+                _ftp->login(_user,_pass);
         }
     }
     else if (_ftp->currentCommand() == QFtp::Login)

@@ -40,6 +40,7 @@ private slots:
     void resetSettings();
     void checkSettings();
     void setLogPath();
+    void setBkupPath();
     void InitDefaultSettings();
     void onActionBtnClick(QAbstractButton* btn);
     void LoadSettings();

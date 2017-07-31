@@ -134,7 +134,6 @@ bool logger::createDefaultLogPath(QString &err)
         err = "Create default log path :: ENV['TEMP'] does not exist. Contact administrator.";
         return false;
     }
-
     if (!tempPath.mkpath("peercore/ftpClient"))
     {
         err =  "Create default log path :: '" + QDir::tempPath() +  "/peercore/ftpClient' cannot be created. Contact administrator.";

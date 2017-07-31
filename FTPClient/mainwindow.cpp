@@ -157,8 +157,8 @@ void MainWindow::SaveSettings()
 //-----------------------------------------------------------------------------------------------------------------------------------------
  void MainWindow::initMainTableHeaders()
  {
-     if (_mainTableColumns.size() == 0) // first run has no columns registered
-          _mainTableColumns << "File Name" << "File Size" << "Last modified time" << "Status" << "Progress";
+     _mainTableColumns.clear();
+     _mainTableColumns << "File Name" << "File Size" << "Last modified time" << "Progress" << "File Name" << "Path";
 
      _tableWidget->setColumnCount(_mainTableColumns.size());
 
@@ -177,7 +177,7 @@ void MainWindow::SaveSettings()
       _errortableWidget->setColumnCount(5);
 
       _errortableWidget->setHorizontalHeaderLabels(titles);
-      for (int i = 0; i < 5 ; i++)
+      for (int i = 0; i < titles.size() ; i++)
          _errortableWidget->horizontalHeaderItem(i)->setTextAlignment(Qt::AlignLeft);
 
          _errortableWidget->resizeRowsToContents();
@@ -192,7 +192,7 @@ void MainWindow::SaveSettings()
        _statTableWidget->setColumnCount(2);
 
        _statTableWidget->setHorizontalHeaderLabels(titles);
-       for (int i = 0; i < 2 ; i++)
+       for (int i = 0; i < titles.size() ; i++)
           _statTableWidget->horizontalHeaderItem(i)->setTextAlignment(Qt::AlignLeft);
 
           _statTableWidget->resizeRowsToContents();

@@ -16,7 +16,7 @@
 #include <queue>
 
 #define STAT_TIMER_INTERVAL 5
-#define TX_TIMER_INTERVAL 30
+#define TX_TIMER_INTERVAL 10
 
 class QFileInfo;
 typedef std::pair<QFileInfo*,int> PAIR_FI_I;
@@ -40,7 +40,7 @@ public:
     void onFileUploadProgress(PAIR_FI_I* fileinfo, qint64 now, qint64 total);
     void onFtpClientConnected();
     void onFtpInterrupted();
-    void onHKTimerDurationChanged(QTime time) {};
+    void onHKTimerDurationChanged(QTime time) { qDebug() << time.toString();};
 
 private:
     //-----------------------------------------------------
@@ -77,8 +77,10 @@ private:
     void initNetworkSession();
     void processNextInMasterQueue();
     void createTransactionTimers();
-    void createStatTimer();
+    void createHKAndStatTimer();
     void initStatTable();
+    void runDirBackup();
+    void generateReport();
 
 private slots:
     void onDiscScanTimer();
@@ -88,6 +90,7 @@ private slots:
     void onNetworkConfigChange(const QNetworkConfiguration & config);
     void onStatTimer();
     void onTransferTimer();
+    void onHouseKeepingTimer();
 };
 
 #endif // SYNCMANAGER_H

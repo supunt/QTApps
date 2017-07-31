@@ -8,7 +8,7 @@ extern QString g_scanDirPath;
 dirScanner::dirScanner(Abscallback* callback)
 {
     _listner = callback;
-     _fileTypes <<  "*.txt";
+     _fileTypes <<  "*.pdf";
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 bool dirScanner::OnSyncTimer(QString& err)

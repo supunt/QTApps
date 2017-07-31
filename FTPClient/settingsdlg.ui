@@ -62,20 +62,10 @@
      <x>10</x>
      <y>10</y>
      <width>501</width>
-     <height>193</height>
+     <height>221</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="settingsLayout">
-    <item row="3" column="1">
-     <widget class="QLineEdit" name="ftp_pass">
-      <property name="echoMode">
-       <enum>QLineEdit::Password</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="1">
-     <widget class="QLineEdit" name="ftp_host"/>
-    </item>
     <item row="2" column="0">
      <widget class="QLabel" name="label_4">
       <property name="text">
@@ -83,17 +73,16 @@
       </property>
      </widget>
     </item>
+    <item row="1" column="1">
+     <widget class="QLineEdit" name="ftp_host"/>
+    </item>
+    <item row="2" column="1">
+     <widget class="QLineEdit" name="ftp_user"/>
+    </item>
     <item row="0" column="1">
      <widget class="QLineEdit" name="sync_interval">
       <property name="text">
        <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Folder Scan interval (sec)</string>
       </property>
      </widget>
     </item>
@@ -104,13 +93,24 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="1">
-     <widget class="QLineEdit" name="ftp_user"/>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Folder Scan interval (sec)</string>
+      </property>
+     </widget>
     </item>
     <item row="3" column="0">
      <widget class="QLabel" name="label_5">
       <property name="text">
        <string>Remote Password</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="0">
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>Log Path</string>
       </property>
      </widget>
     </item>
@@ -129,9 +129,12 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>118</width>
+           <width>71</width>
            <height>22</height>
           </rect>
+         </property>
+         <property name="displayFormat">
+          <string>h:mm AP</string>
          </property>
         </widget>
        </widget>
@@ -148,10 +151,20 @@
       </item>
      </layout>
     </item>
-    <item row="6" column="0">
-     <widget class="QLabel" name="label_6">
+    <item row="5" column="1">
+     <widget class="QLineEdit" name="thread_count"/>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_2">
       <property name="text">
-       <string>Log Path</string>
+       <string>FTP Daemons</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>House keeping start at</string>
       </property>
      </widget>
     </item>
@@ -173,22 +186,37 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_2">
+    <item row="7" column="0">
+     <widget class="QLabel" name="label_8">
       <property name="text">
-       <string>FTP Daemons</string>
+       <string>Backup Path</string>
       </property>
      </widget>
     </item>
-    <item row="5" column="1">
-     <widget class="QLineEdit" name="thread_count"/>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="label_7">
-      <property name="text">
-       <string>House keeping start at</string>
+    <item row="3" column="1">
+     <widget class="QLineEdit" name="ftp_pass">
+      <property name="echoMode">
+       <enum>QLineEdit::Password</enum>
       </property>
      </widget>
+    </item>
+    <item row="7" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="bkup_path">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_setBkupPath">
+        <property name="text">
+         <string>Set</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -198,9 +226,12 @@
   <tabstop>ftp_host</tabstop>
   <tabstop>ftp_user</tabstop>
   <tabstop>ftp_pass</tabstop>
+  <tabstop>house_keeping</tabstop>
   <tabstop>thread_count</tabstop>
   <tabstop>log_path</tabstop>
   <tabstop>btn_setLogPath</tabstop>
+  <tabstop>bkup_path</tabstop>
+  <tabstop>btn_setBkupPath</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -268,6 +299,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>btn_setBkupPath</sender>
+   <signal>clicked()</signal>
+   <receiver>settingsDlg</receiver>
+   <slot>setBkupPath()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>501</x>
+     <y>214</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>241</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>setLogPath()</slot>
@@ -275,5 +322,6 @@
   <slot>setSyncDir()</slot>
   <slot>syncTimeChanged()</slot>
   <slot>onActionBtnClick(QAbstractButton*)</slot>
+  <slot>setBkupPath()</slot>
  </slots>
 </ui>

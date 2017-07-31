@@ -30,7 +30,8 @@ void QTableWidgetEx::Insert_Row(QFileInfo* qfi, int& rownum)
     setCellData(rownum,1,&temp,&qc);
     setCellData(rownum,2,&qfi->created(),&qc);
     setCellData(rownum,3,pgb,&qc);
-    setCellData(rownum,4,&qfi->absoluteFilePath(),&qc);
+    setCellData(rownum,4,&qfi->fileName(),&qc);
+    setCellData(rownum,5,&qfi->absolutePath(),&qc);
 
     resizeRowsToContents();
     resizeColumnsToContents();
