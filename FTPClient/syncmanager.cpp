@@ -4,6 +4,8 @@
 #include "utils.h"
 
 #include <QDebug>
+#include <QtPrintSupport/QPrinter>
+#include <QTextDocument>
 #include <QProgressBar>
 #include <QtNetwork/QNetworkConfiguration>
 
@@ -467,7 +469,7 @@ void syncManager::onHouseKeepingTimer()
 
         // Backup files.
         runDirBackup();
-        GenerateReport();
+        generateReport();
         return;
      }
     else
@@ -525,7 +527,7 @@ void syncManager::runDirBackup()
        QString pathCellValue = _mainViewCtrl->item(i,5)->text();
        QString fileCellValue = _mainViewCtrl->item(i,4)->text();
         //-----------------------------------------------------------------------------------------------------------------------------------
-       if (!bkupPath.exists(pathCellValue + "/"+ fileCellValue))
+       if (!bkupPath.exists(bkupPath.path() + "/"+ fileCellValue))
        {
             if (!QFile::copy((pathCellValue + "/"+ fileCellValue), (bkupPath.path() + "/" + fileCellValue)))
             {
@@ -542,4 +544,40 @@ void syncManager::runDirBackup()
        }
         //-----------------------------------------------------------------------------------------------------------------------------------
     }
+}
+//-----------------------------------------------------------------------------------------------------------------------------------------
+void syncManager::generateReport()
+{
+        QString fileName = MainWindow::getSetting("bkup_path") + "/report.pdf";
+        QPrinter printer(QPrinter::PrinterResolution);
+        printer.setOutputFormat(QPrinter::PdfFormat);
+        printer.setPaperSize(QPrinter::A4);
+        printer.setOutputFileName(fileName);
+
+        QDate date = QDate::currentDate();
+        QTextDocument doc;
+        QString htmlString = "<h1>Nick Auditore</h1>\n<p>Daily FTP report for " +
+                                        date.toString("ddd MMMM d yyyy") +"</p>";
+        htmlString += "<table>";
+        htmlString += "<th>";
+        htmlString += "<td style=\"width=200px; bgcolor:#475D87\">File Name</td>";
+        htmlString += "<td style=\"width=500px; bgcolor:#475D87\">Originated path</td>";
+        htmlString += "<td style=\"width=100px; bgcolor:#475D87\">File Size</td>";
+        htmlString += "</th>";
+        int files = _mainViewCtrl->rowCount();
+        for (int i=0; i < files; ++i)
+        {
+           htmlString += "<tr>";
+           QString name = _mainViewCtrl->item(i,4)->text();
+           QString path = _mainViewCtrl->item(i,5)->text();
+           QString size = _mainViewCtrl->item(i,1)->text();
+           htmlString += "<td>" +name+ "</td>";
+           htmlString += "<td>" +path+ "</td>";
+           htmlString += "<td>" +size+ "</td>";
+           htmlString += "</tr>";
+         }
+        htmlString += "</table>";
+        doc.setHtml(htmlString);
+        doc.setPageSize(printer.pageRect().size()); // This is necessary if you want to hide the page number
+        doc.print(&printer);
 }
