@@ -10,6 +10,9 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 
+#include <QtPrintSupport/QPrinter>
+#include <QTextDocument>
+
 #define MOVE_BETWEEN_SCREENS_OFFSET_PX 200
 #define PRIMARY_SCREEN 0
 
@@ -222,6 +225,7 @@ void MainWindow::SaveSettings()
         }
 
         _syncMan->setSyncState(true);
+
    }
   //----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::onChangeSyncState()

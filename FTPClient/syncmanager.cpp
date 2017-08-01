@@ -556,14 +556,15 @@ void syncManager::generateReport()
 
         QDate date = QDate::currentDate();
         QTextDocument doc;
-        QString htmlString = "<h1>Nick Auditore</h1>\n<p>Daily FTP report for " +
-                                        date.toString("ddd MMMM d yyyy") +"</p>";
-        htmlString += "<table>";
+        QString htmlString = "<h1><font color='#475D87'>Nick Auditore</font></h1>\n";
+        htmlString += "<p>Daily FTP report for " + date.toString("ddd, MMMM d yyyy") +"</p>\n";
+        htmlString += "<table border-collapse=\"collapse\" border-width=\"thin\" border-sytle=\"solid\" border-color=\"black\">";
         htmlString += "<th>";
-        htmlString += "<td style=\"width=200px; bgcolor:#475D87\">File Name</td>";
-        htmlString += "<td style=\"width=500px; bgcolor:#475D87\">Originated path</td>";
-        htmlString += "<td style=\"width=100px; bgcolor:#475D87\">File Size</td>";
+        htmlString += "<td bgcolor='#475D87' padding='15px' >File Name</td>";
+        htmlString += "<td bgcolor='#475D87' padding='15px'>Originated path</td>";
+        htmlString += "<td bgcolor='#475D87' padding='15px'>File Size</td>";
         htmlString += "</th>";
+
         int files = _mainViewCtrl->rowCount();
         for (int i=0; i < files; ++i)
         {
