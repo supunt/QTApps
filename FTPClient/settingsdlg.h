@@ -24,6 +24,7 @@ public:
     ~settingsDlg();
 
     void setCallback(Abscallback* cb) {_syncManager = cb;};
+    void showWindow();
 
 private:
     Ui::settingsDlg *ui;

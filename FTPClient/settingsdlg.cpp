@@ -192,6 +192,8 @@ void settingsDlg::onActionBtnClick(QAbstractButton* btn)
 //--------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::revertSettings()
 {
+    if (_prevSettings.size() == 0)
+        return;
     //--------------------------------------------------------------------------------------------------------------------------------------
     QList<QLineEdit*> listChildern = this->findChildren<QLineEdit*>();
 
@@ -204,3 +206,10 @@ void settingsDlg::revertSettings()
     for (auto child : listChildernCmb)
         child->setCurrentIndex(_prevSettings[child->objectName()].toInt());
 }
+//--------------------------------------------------------------------------------------------------------------------------------------
+void settingsDlg::showWindow()
+{
+    LoadSettings();
+    show();
+}
+//--------------------------------------------------------------------------------------------------------------------------------------

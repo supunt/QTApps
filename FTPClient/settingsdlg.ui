@@ -358,6 +358,7 @@
   <tabstop>ftp_host</tabstop>
   <tabstop>ftp_user</tabstop>
   <tabstop>ftp_pass</tabstop>
+  <tabstop>ftp_cd_path</tabstop>
   <tabstop>ftp_mode</tabstop>
   <tabstop>house_keeping</tabstop>
   <tabstop>thread_count</tabstop>

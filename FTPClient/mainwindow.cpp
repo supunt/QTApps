@@ -270,7 +270,7 @@ void MainWindow::onDirPathChange()
 //----------------------------------------------------------------------------------------------------------------------------------------
 void MainWindow::on_actionSettings_triggered()
 {
-     _settingsDlg->show();
+    _settingsDlg->showWindow();
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
 QString MainWindow::getSetting(QString key ,QString defVal)
