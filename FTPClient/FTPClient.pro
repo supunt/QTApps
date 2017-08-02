@@ -60,3 +60,6 @@ FORMS    += mainwindow.ui \
     settingsdlg.ui
 
 RC_FILE = ftpc.rc
+
+RESOURCES += \
+    resource.qrc

@@ -20,7 +20,7 @@
       <x>10</x>
       <y>10</y>
       <width>591</width>
-      <height>25</height>
+      <height>26</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="topLayout">
@@ -29,17 +29,14 @@
        <property name="text">
         <string>Set scan directory</string>
        </property>
+       <property name="icon">
+        <iconset resource="resource.qrc">
+         <normaloff>:/icons/Folder.png</normaloff>:/icons/Folder.png</iconset>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QLineEdit" name="txt_path"/>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="chk_hash">
-       <property name="text">
-        <string>Enable Hash Check</string>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="Line" name="line">
@@ -52,6 +49,10 @@
       <widget class="QPushButton" name="btnSync">
        <property name="text">
         <string>Pause Sync</string>
+       </property>
+       <property name="icon">
+        <iconset resource="resource.qrc">
+         <normaloff>:/icons/Pause.png</normaloff>:/icons/Pause.png</iconset>
        </property>
       </widget>
      </item>
@@ -77,13 +78,19 @@
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/Settings.png</normaloff>:/icons/Settings.png</iconset>
+   </property>
    <property name="text">
     <string>Settings</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>btn_path</sender>
