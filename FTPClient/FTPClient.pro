@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     qt4_legacy/qftp.cpp \
     qt4_legacy/qurlinfo.cpp \
     changeSettingsNotificationCB.cpp \
-    logger/logger.cpp
+    logger/logger.cpp \
+    qt4_legacy/qzftp.cpp
 
 HEADERS  += mainwindow.h \
     qtablewidgetex.h \
@@ -52,7 +53,8 @@ HEADERS  += mainwindow.h \
     qt4_legacy/qurlinfo.h \
     changeSettingsNotificationCB.h \
     logger/logger.h \
-    utils.h
+    utils.h \
+    qt4_legacy/qzftp.h
 
 FORMS    += mainwindow.ui \
     settingsdlg.ui
