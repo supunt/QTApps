@@ -26,7 +26,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp \
+    mainwindow.cpp \
     qtablewidgetex.cpp \
     dirscanner.cpp \
     syncmanager.cpp \
@@ -58,3 +58,5 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     settingsdlg.ui
+
+RC_FILE = ftpc.rc
