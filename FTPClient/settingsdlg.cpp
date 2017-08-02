@@ -18,6 +18,7 @@ settingsDlg::settingsDlg(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowIcon(QIcon(":/icons/Settings.png"));
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
     InitDefaultSettings();
     LoadSettings();
 }
