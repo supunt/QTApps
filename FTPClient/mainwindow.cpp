@@ -233,7 +233,7 @@ void MainWindow::onChangeSyncState()
     QPalette pal = ui->btnSync->palette();
     if (_syncMan->getSyncState())
     {
-        _syncMan->report("Haulting sync.",MAINWND,WARNING);
+        _syncMan->report("Haulting sync. If a file is in transfer, it will be completed.",MAINWND,WARNING);
         ui->btnSync->setText("Start sync");
         _syncMan->setSyncState(false);
         pal.setColor(QPalette::Button, QColor(Qt::green));

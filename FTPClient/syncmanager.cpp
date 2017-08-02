@@ -271,14 +271,15 @@ void syncManager::onScanTimerDurationChanged(int newDuration)
 void syncManager::onNetworkSessionError(QNetworkSession::SessionError error)
 {
     report("Connection Error : " + _networkSession->errorString() + "(Network name : " +
-                _networkSession->configuration().name() + ", State : "
+                _networkSession->configuration().name() + ", error code : " + QString::number(error)
                 ,NTWK, ERROR);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::onNetworkConnEstablished()
 {
     report("Connected to network '" + _networkSession->configuration().name() +
-           "' [ Type : " + _networkSession->configuration().bearerTypeName() + " ].",SYNCMAN, TEXT);
+           "' [ Type : " + _networkSession->configuration().bearerTypeName() +
+           " ].",SYNCMAN, TEXT);
 
     QString err = "";
     _ftpAgents[0]->startDaemon(err);

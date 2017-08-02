@@ -11,7 +11,10 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>FTP Transfer Client</string>
+  </property>
+  <property name="windowOpacity">
+   <double>1.000000000000000</double>
   </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QWidget" name="layoutWidget">
@@ -73,8 +76,17 @@
      <string>File</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="separator"/>
+    <addaction name="action_Close"/>
+   </widget>
+   <widget class="QMenu" name="menuAppearence">
+    <property name="title">
+     <string>Appearence</string>
+    </property>
+    <addaction name="actionSwitch_Theme"/>
    </widget>
    <addaction name="menuSettings"/>
+   <addaction name="menuAppearence"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionSettings">
@@ -84,6 +96,27 @@
    </property>
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionSwitch_Theme">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/theme.png</normaloff>:/icons/theme.png</iconset>
+   </property>
+   <property name="text">
+    <string>Switch Theme</string>
+   </property>
+   <property name="toolTip">
+    <string>Change theme</string>
+   </property>
+  </action>
+  <action name="action_Close">
+   <property name="icon">
+    <iconset resource="resource.qrc">
+     <normaloff>:/icons/icons8-Close Window.png</normaloff>:/icons/icons8-Close Window.png</iconset>
+   </property>
+   <property name="text">
+    <string>Close</string>
    </property>
   </action>
  </widget>

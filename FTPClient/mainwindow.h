@@ -43,6 +43,7 @@ private:
      void LoadSettings();
      void SaveSettings();
      settingsDlg* _settingsDlg;
+     QPalette _darkPallet;
 
      //-------------------------------------------------------------
      void DefaultAppSettings();
@@ -54,6 +55,7 @@ private slots:
     void onChangeSyncState();
     void onDirPathChange();
     void on_actionSettings_triggered();
+    void on_action_Close_triggered() {close();}
     void on_ScreenCountChange(int newScreenCount);
 };
 
