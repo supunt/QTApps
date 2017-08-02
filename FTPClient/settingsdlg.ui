@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>343</height>
+    <height>354</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,7 +44,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>300</y>
+     <y>310</y>
      <width>501</width>
      <height>32</height>
     </rect>
@@ -62,10 +62,24 @@
      <x>10</x>
      <y>10</y>
      <width>501</width>
-     <height>254</height>
+     <height>281</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="settingsLayout">
+    <item row="0" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
+      <item>
+       <widget class="QLineEdit" name="sync_interval">
+        <property name="toolTip">
+         <string>How frequently the tool will scan the data folder</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
     <item row="3" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
@@ -80,19 +94,12 @@
       </item>
      </layout>
     </item>
-    <item row="0" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_6">
-      <item>
-       <widget class="QLineEdit" name="sync_interval">
-        <property name="toolTip">
-         <string>How frequently the tool will scan the data folder</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
+    <item row="2" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Remote User</string>
+      </property>
+     </widget>
     </item>
     <item row="2" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_7">
@@ -112,13 +119,6 @@
       </property>
      </widget>
     </item>
-    <item row="2" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Remote User</string>
-      </property>
-     </widget>
-    </item>
     <item row="1" column="1">
      <widget class="QLineEdit" name="ftp_host">
       <property name="toolTip">
@@ -126,28 +126,7 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <widget class="QLabel" name="label_5">
-      <property name="text">
-       <string>Remote Password</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Folder Scan interval (sec)</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0">
-     <widget class="QLabel" name="label_6">
-      <property name="text">
-       <string>Log Path</string>
-      </property>
-     </widget>
-    </item>
-    <item row="5" column="1">
+    <item row="6" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -178,35 +157,56 @@
       </item>
      </layout>
     </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_7">
-      <property name="text">
-       <string>House keeping start at</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>FTP Daemons</string>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
+    <item row="9" column="0">
      <widget class="QLabel" name="label_8">
       <property name="text">
        <string>Backup Path</string>
       </property>
      </widget>
     </item>
-    <item row="4" column="0">
+    <item row="7" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>FTP Daemons</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
      <widget class="QLabel" name="label_9">
       <property name="text">
        <string>FTP Mode</string>
       </property>
      </widget>
     </item>
-    <item row="8" column="1">
+    <item row="6" column="0">
+     <widget class="QLabel" name="label_7">
+      <property name="text">
+       <string>House keeping start at</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Folder Scan interval (sec)</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Remote Password</string>
+      </property>
+     </widget>
+    </item>
+    <item row="8" column="0">
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>Log Path</string>
+      </property>
+     </widget>
+    </item>
+    <item row="9" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QLineEdit" name="bkup_path">
@@ -227,7 +227,7 @@
       </item>
      </layout>
     </item>
-    <item row="7" column="1">
+    <item row="8" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QLineEdit" name="log_path">
@@ -248,37 +248,7 @@
       </item>
      </layout>
     </item>
-    <item row="6" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout_9">
-      <item>
-       <widget class="QLineEdit" name="thread_count">
-        <property name="toolTip">
-         <string>This is a future enhancement.</string>
-        </property>
-        <property name="text">
-         <string>1</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>288</width>
-          <height>17</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="4" column="1">
+    <item row="5" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
        <widget class="QComboBox" name="ftp_mode">
@@ -320,13 +290,60 @@
       </item>
      </layout>
     </item>
+    <item row="7" column="1">
+     <layout class="QHBoxLayout" name="horizontalLayout_9">
+      <item>
+       <widget class="QLineEdit" name="thread_count">
+        <property name="toolTip">
+         <string>This is a future enhancement.</string>
+        </property>
+        <property name="text">
+         <string>1</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>288</width>
+          <height>17</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_10">
+      <property name="text">
+       <string>Remote Path</string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="1">
+     <widget class="QLineEdit" name="ftp_cd_path">
+      <property name="toolTip">
+       <string>FTP password</string>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::Normal</enum>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="Line" name="line">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>290</y>
+     <y>300</y>
      <width>501</width>
      <height>16</height>
     </rect>

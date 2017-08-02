@@ -39,9 +39,10 @@ private:
     QFtp *_ftp = nullptr;
     QFile *_file = nullptr;
     QNetworkSession* _ntwkSesstion = nullptr;
-    QString _host;
-    QString _user;
-    QString _pass;
+    QString _host = "";
+    QString _user = "";
+    QString _pass = "";
+    QString _cdPath = "";
     QFtp::TransferMode _ftpMode = QFtp::Active;
     PAIR_FI_I _currentFileInfo;
     QTimer* _reconnectTimer = nullptr;

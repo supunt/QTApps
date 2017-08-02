@@ -16,17 +16,18 @@ ftpSenderDaemon::ftpSenderDaemon(Abscallback* cb, int chThreadID)
 bool ftpSenderDaemon::startDaemon(QString& err)
 {
     err = "";
-    _host = MainWindow::getSetting("ftp_host");
-    _user = MainWindow::getSetting("ftp_user");
-    _pass = MainWindow::getSetting("ftp_pass");
-    _ftpMode = MainWindow::getSetting("ftp_pass").toInt()?QFtp::Passive:QFtp::Active;
-
     init();
     return true;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::init()
 {
+    _host = MainWindow::getSetting("ftp_host");
+    _user = MainWindow::getSetting("ftp_user");
+    _pass = MainWindow::getSetting("ftp_pass");
+    _ftpMode = MainWindow::getSetting("ftp_pass").toInt()?QFtp::Passive:QFtp::Active;
+    _cdPath = MainWindow::getSetting("ftp_cd_path");
+
     if (_ftp)
     {
         delete _ftp;
@@ -77,7 +78,6 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
     {
         if (error)
         {
-            // TODO NOT THREAD SAFE
             _syncManager->report("Ftp host " + _host + " unreachable.",FTP,ERROR);
 
             if (_commandTimeoutTimer)
@@ -153,7 +153,12 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
                 delete _reconnectTimer;
                 _reconnectTimer = nullptr;
             }
-            _syncManager->onFtpClientConnected();
+
+            if (_cdPath.trimmed() == "")
+                _syncManager->onFtpClientConnected();
+            else
+                _ftp->cd(_cdPath);
+
             return;
         }
     }
@@ -161,7 +166,6 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
     {
         if (error)
         {
-            // TODO NOT THREAD SAFE
             _syncManager->report("File '" + _currentFileInfo.first->filePath() +
                                  "' sending failed. ["+ _ftp->errorString() + "].",FTP,ERROR);
 
@@ -190,6 +194,41 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
                 delete _commandTimeoutTimer;
                 _commandTimeoutTimer = nullptr;
             }
+            return;
+        }
+    }
+    else if (_ftp->currentCommand() == QFtp::Cd)
+    {
+        if (error)
+        {
+            _syncManager->report("Change directory failed. Check FTP server and verify the folder " +_cdPath +
+                                 "' exists. ["+ _ftp->errorString() + "].",FTP,ERROR);
+
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
+            if (!_reconnectTimer)
+            {
+                _reconnectTimer = new QTimer();
+                connect(_reconnectTimer,SIGNAL(timeout()),this,SLOT(onReconnectTimer()));
+                _reconnectTimer->start(FTP_RECONNECT_TIMER_INTERVAL);
+            }
+            return;
+        }
+        else
+        {
+            _syncManager->report("Changed to FTP directory '" + _cdPath +
+                                 "' successfully.",FTP,TEXT);
+
+            if (_commandTimeoutTimer)
+            {
+                delete _commandTimeoutTimer;
+                _commandTimeoutTimer = nullptr;
+            }
+
+             _syncManager->onFtpClientConnected();
             return;
         }
     }

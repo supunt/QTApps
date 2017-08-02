@@ -288,31 +288,29 @@ void syncManager::onNetworkConnEstablished()
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::initNetworkSession()
 {
+    logger::log("Attempt network connection.");
     if (_netConnTimer)
         delete _netConnTimer;
 
     if (_networkSession)
         delete _networkSession;
 
-    QSettings networkSettings;
-    networkSettings.beginGroup("network");
-    const QString defNtwk = networkSettings.value("DefaultNetConfig").toString();
-    networkSettings.endGroup();
+    QNetworkConfiguration ntwkConfig;
 
-    QNetworkConfiguration ntwkConfig = _manager->configurationFromIdentifier(defNtwk);
-    if ((ntwkConfig.state() & QNetworkConfiguration::Discovered) != QNetworkConfiguration::Discovered)
-    {
-           QList<QNetworkConfiguration> ntConf =_manager->allConfigurations(QNetworkConfiguration::Active);
-           for (auto cfg : ntConf)
-           {
-               // get rid of VMWare adapters
-               if (QNetworkConfiguration::BearerUnknown == cfg.bearerType())
-                   continue;
-               // connecting to very first adaptor
-               ntwkConfig = cfg;
-               break;
-           }
-    }
+   logger::log("Looking througn network connections --------.");
+   QList<QNetworkConfiguration> ntConf =_manager->allConfigurations(QNetworkConfiguration::Active);
+   for (auto cfg : ntConf)
+   {
+        logger::log("Available active network connection --------.");
+        logger::log("\t Name : " + cfg.name());
+        logger::log("\t Type : " + cfg.bearerTypeName());
+
+       if (QNetworkConfiguration::BearerUnknown == cfg.bearerType()) // get rid of VMWare adapters
+           continue;
+
+       ntwkConfig = cfg;
+       break;
+   }
 
     if (ntwkConfig.name() == "")
     {
