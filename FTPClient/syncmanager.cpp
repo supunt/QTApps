@@ -28,8 +28,10 @@ syncManager::syncManager(QTableWidgetEx* mainViewCtrl,QTableWidgetEx* errorViewC
     for (int i = 0; i < ftpThrCnt; ++i)
         _ftpAgents[i] = new ftpSenderDaemon(this,i);
 
+
     _cellData = new cellData;
     _cellData->setup(-1,-1,typeid(int).hash_code(),nullptr);
+    _syncInterval = MainWindow::getSetting("sync_interval").toInt();
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void syncManager::run()

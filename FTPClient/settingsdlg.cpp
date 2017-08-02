@@ -9,6 +9,7 @@
 #include <mainwindow.h>
 #include <QFileDialog>
 #include <QAbstractButton>
+#include <QComboBox>
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 settingsDlg::settingsDlg(QWidget *parent) :
@@ -35,6 +36,7 @@ void settingsDlg::LoadSettings()
      QString temp = "";
     for (auto child : listChildern)
     {
+
         temp =_generalSettings->value(child->objectName()).toString();
         if (temp == "")
         {
@@ -43,6 +45,21 @@ void settingsDlg::LoadSettings()
                 temp = ite->second;
         }
         child->setText(temp);
+        MainWindow::_mapSettings[child->objectName()] = temp;
+        qDebug() << "Loaded Setting : " + child->objectName() + " : " + temp;
+    }
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    QList<QComboBox*> listChildernCmb = this->findChildren<QComboBox*>();
+    for (auto child : listChildernCmb)
+    {
+        temp =_generalSettings->value(child->objectName()).toString();
+        if (temp == "")
+        {
+            auto ite = _defaultSettings.find(child->objectName());
+            if  (ite != _defaultSettings.end())
+                temp = ite->second;
+        }
+        child->setCurrentIndex(temp.toInt());
         MainWindow::_mapSettings[child->objectName()] = temp;
         qDebug() << "Loaded Setting : " + child->objectName() + " : " + temp;
     }
@@ -58,6 +75,14 @@ void settingsDlg::saveSettings()
     {
        _generalSettings->setValue(child->objectName(),child->text());
        MainWindow::updateSetting(child->objectName(),child->text());
+    }
+
+    QList<QComboBox*> listChildernCmb = this->findChildren<QComboBox*>();
+
+    for (auto child : listChildernCmb)
+    {
+       _generalSettings->setValue(child->objectName(),QString::number(child->currentIndex()));
+       MainWindow::updateSetting(child->objectName(),QString::number(child->currentIndex()));
     }
     _generalSettings->endGroup();
 
@@ -112,6 +137,11 @@ void settingsDlg::InitDefaultSettings()
     _defaultSettings[ui->log_path->objectName()] = QDir::tempPath() +"/Peercore/FTPClient";
     _defaultSettings[ui->bkup_path->objectName()] = QDir::tempPath() +"/Peercore/FTPClient/daily_backup";
     _defaultSettings[ui->thread_count->objectName()] = QString::number(FTP_DEF_THREAD_COUNT);
+    _defaultSettings[ui->ftp_mode->objectName()] = 1;
+
+    // Add combo values,
+    ui->ftp_mode->addItem("Passive", PASSIVE);
+    ui->ftp_mode->addItem("Active", ACTIVE);
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 QString settingsDlg::getDefaultSetting(QString key)

@@ -42,6 +42,7 @@ private:
     QString _host;
     QString _user;
     QString _pass;
+    QFtp::TransferMode _ftpMode = QFtp::Active;
     PAIR_FI_I _currentFileInfo;
     QTimer* _reconnectTimer = nullptr;
     QTimer* _commandTimeoutTimer = nullptr;

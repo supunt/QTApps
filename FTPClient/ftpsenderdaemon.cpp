@@ -18,6 +18,7 @@ bool ftpSenderDaemon::startDaemon(QString& err)
     _host = MainWindow::getSetting("ftp_host");
     _user = MainWindow::getSetting("ftp_user");
     _pass = MainWindow::getSetting("ftp_pass");
+    _ftpMode = MainWindow::getSetting("ftp_pass").toInt()?QFtp::Passive:QFtp::Active;
 
     init();
     return true;
@@ -38,6 +39,7 @@ void ftpSenderDaemon::init()
      connect(_ftp, SIGNAL(commandStarted(int)),
                         this, SLOT(onFtpcommandStarted(int)));
 
+      _ftp->setTransferMode(_ftpMode);
       _ftp->connectToHost(_host, 21);
 
     return;
