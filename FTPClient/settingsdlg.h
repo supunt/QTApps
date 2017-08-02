@@ -31,10 +31,11 @@ private:
     QSettings* _generalSettings;
 
      void doPostChangeSettingValidations();
+     void revertSettings();
     Abscallback* _syncManager = nullptr;
 
     MAP_STR_STR _defaultSettings;
-
+    MAP_STR_STR _prevSettings;
 private slots:
     void saveSettings();
     void resetSettings();
@@ -44,6 +45,7 @@ private slots:
     void InitDefaultSettings();
     void onActionBtnClick(QAbstractButton* btn);
     void LoadSettings();
+
     QString getDefaultSetting(QString key);
 };
 

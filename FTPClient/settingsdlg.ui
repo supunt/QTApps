@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>520</width>
-    <height>321</height>
+    <height>343</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -44,7 +44,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>280</y>
+     <y>300</y>
      <width>501</width>
      <height>32</height>
     </rect>
@@ -70,6 +70,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <item>
        <widget class="QLineEdit" name="ftp_pass">
+        <property name="toolTip">
+         <string>FTP password</string>
+        </property>
         <property name="echoMode">
          <enum>QLineEdit::Password</enum>
         </property>
@@ -81,6 +84,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
        <widget class="QLineEdit" name="sync_interval">
+        <property name="toolTip">
+         <string>How frequently the tool will scan the data folder</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -91,7 +97,11 @@
     <item row="2" column="1">
      <layout class="QHBoxLayout" name="horizontalLayout_7">
       <item>
-       <widget class="QLineEdit" name="ftp_user"/>
+       <widget class="QLineEdit" name="ftp_user">
+        <property name="toolTip">
+         <string>FTP user name</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
@@ -110,7 +120,11 @@
      </widget>
     </item>
     <item row="1" column="1">
-     <widget class="QLineEdit" name="ftp_host"/>
+     <widget class="QLineEdit" name="ftp_host">
+      <property name="toolTip">
+       <string>IP address or the url where the files to be sent</string>
+      </property>
+     </widget>
     </item>
     <item row="3" column="0">
      <widget class="QLabel" name="label_5">
@@ -139,6 +153,9 @@
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <widget class="QTimeEdit" name="house_keeping">
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When would the housekeeping start. &lt;/p&gt;&lt;p&gt;When it starts, files added afterwards will not be transferred to the client site.&lt;/p&gt;&lt;p&gt;Once all the files in queue are processed, a backup of transferred files will be created at the place indicated by the 'Backup Path' in a dated folder.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="displayFormat">
            <string>h:mm AP</string>
           </property>
@@ -193,6 +210,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QLineEdit" name="bkup_path">
+        <property name="toolTip">
+         <string>Path where the transferred files will be archieved.</string>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>
@@ -211,6 +231,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <widget class="QLineEdit" name="log_path">
+        <property name="toolTip">
+         <string>Path where the log will be written</string>
+        </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>
@@ -229,6 +252,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_9">
       <item>
        <widget class="QLineEdit" name="thread_count">
+        <property name="toolTip">
+         <string>This is a future enhancement.</string>
+        </property>
         <property name="text">
          <string>1</string>
         </property>
@@ -256,6 +282,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout_5">
       <item>
        <widget class="QComboBox" name="ftp_mode">
+        <property name="toolTip">
+         <string>FTP mode of transfer [Dependant on FTP and Firewall setup]</string>
+        </property>
         <property name="currentText">
          <string/>
         </property>
@@ -297,7 +326,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>270</y>
+     <y>290</y>
      <width>501</width>
      <height>16</height>
     </rect>
@@ -308,7 +337,13 @@
   </widget>
  </widget>
  <tabstops>
+  <tabstop>sync_interval</tabstop>
   <tabstop>ftp_host</tabstop>
+  <tabstop>ftp_user</tabstop>
+  <tabstop>ftp_pass</tabstop>
+  <tabstop>ftp_mode</tabstop>
+  <tabstop>house_keeping</tabstop>
+  <tabstop>thread_count</tabstop>
   <tabstop>log_path</tabstop>
   <tabstop>btn_setLogPath</tabstop>
   <tabstop>bkup_path</tabstop>

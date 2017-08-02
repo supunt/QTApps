@@ -1,6 +1,7 @@
 #include "ftpsenderdaemon.h"
 #include "mainwindow.h"
 #include "syncmanager.h"
+#include "logger/logger.h"
 
 #include <QDebug>
 
@@ -57,7 +58,9 @@ void ftpSenderDaemon::initCommandTimer()
     {
         case QFtp::Login: timeOut = 10000; break;
         case QFtp::ConnectToHost: timeOut = 20000; break;
-        default: timeOut = 10000; break;
+        case QFtp::Put: timeOut = 10000; break;
+        case QFtp::Cd: timeOut = 5000; break;
+        default: return; break;
     }
 
     if (_commandTimeoutTimer)
@@ -117,7 +120,6 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
     {
         if (error)
         {
-            // TODO NOT THREAD SAFE
             _syncManager->report("Ftp login failed. Please check login detains in settings window",FTP,ERROR);
 
             if (_commandTimeoutTimer)
@@ -195,6 +197,7 @@ void ftpSenderDaemon::ftpCommandFinished(int comID, bool error)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void ftpSenderDaemon::sendFile(PAIR_FI_I* fileInfo)
 {
+    logger::log("Send request to file '" +fileInfo->first->absoluteFilePath()+ "'");
     _currentFileInfo.first = fileInfo->first;
     _currentFileInfo.second = fileInfo->second;
 

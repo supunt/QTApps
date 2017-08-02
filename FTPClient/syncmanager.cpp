@@ -141,7 +141,7 @@ void syncManager::onTransferTimer()
     QProgressBar* wi =(QProgressBar*)_mainViewCtrl->cellWidget(fileinfo->second,3);
     if (!status)
     {
-
+        _mainQProcessing = false;
     }
     else
     {

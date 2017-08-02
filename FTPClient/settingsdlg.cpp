@@ -139,11 +139,12 @@ void settingsDlg::InitDefaultSettings()
     _defaultSettings[ui->log_path->objectName()] = QDir::tempPath() +"/Peercore/FTPClient";
     _defaultSettings[ui->bkup_path->objectName()] = QDir::tempPath() +"/Peercore/FTPClient/daily_backup";
     _defaultSettings[ui->thread_count->objectName()] = QString::number(FTP_DEF_THREAD_COUNT);
-    _defaultSettings[ui->ftp_mode->objectName()] = 1;
+    _defaultSettings[ui->house_keeping->objectName()] = (QTime::fromString("05:00 PM", "h:mm AP")).toString();
 
     // Add combo values,
     ui->ftp_mode->addItem("Passive", PASSIVE);
     ui->ftp_mode->addItem("Active", ACTIVE);
+    _defaultSettings[ui->ftp_mode->objectName()] = 1;
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 QString settingsDlg::getDefaultSetting(QString key)
@@ -157,15 +158,23 @@ QString settingsDlg::getDefaultSetting(QString key)
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::resetSettings()
 {
+    _prevSettings.clear();
+    //--------------------------------------------------------------------------------------------------------------------------------------
     QList<QLineEdit*> listChildern = this->findChildren<QLineEdit*>();
 
     for (auto child : listChildern)
     {
+        _prevSettings[child->objectName()] = child->text();
         child->setText(getDefaultSetting(child->objectName()));
-        MainWindow::updateSetting(child->objectName(),child->text());
     }
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    QList<QComboBox*> listChildernCmb = this->findChildren<QComboBox*>();
 
-    doPostChangeSettingValidations();
+    for (auto child : listChildernCmb)
+    {
+         _prevSettings[child->objectName()] = QString::number(child->currentIndex());
+        child->setCurrentIndex(getDefaultSetting(child->objectName()).toInt());
+    }
 }
 //-----------------------------------------------------------------------------------------------------------------------------------------
 void settingsDlg::onActionBtnClick(QAbstractButton* btn)
@@ -175,5 +184,23 @@ void settingsDlg::onActionBtnClick(QAbstractButton* btn)
     else if (btn == ui->buttonBox->button(QDialogButtonBox::Save))
         saveSettings();
     else if (btn == ui->buttonBox->button(QDialogButtonBox::Cancel))
+    {
+        revertSettings();
        hide();
+    }
+}
+//--------------------------------------------------------------------------------------------------------------------------------------
+void settingsDlg::revertSettings()
+{
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    QList<QLineEdit*> listChildern = this->findChildren<QLineEdit*>();
+
+    for (auto child : listChildern)
+        child->setText(_prevSettings[child->objectName()]);
+
+    //--------------------------------------------------------------------------------------------------------------------------------------
+    QList<QComboBox*> listChildernCmb = this->findChildren<QComboBox*>();
+
+    for (auto child : listChildernCmb)
+        child->setCurrentIndex(_prevSettings[child->objectName()].toInt());
 }
